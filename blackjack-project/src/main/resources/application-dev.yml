@@ -16,6 +16,13 @@ endpoints:
   enabled: false
   health:
     enabled: true
+    
+#OBP values
+obp:
+  username: john
+  userpassword: Treedom#894
+  consumerkey: u14yqghbe1ujohit2nykqr0hntkmodh1ubhn1zn1
+  endpointurl: obpapi-service-demojam.apps.chile-b5a8.open.redhat.com
 
     
 mysql:

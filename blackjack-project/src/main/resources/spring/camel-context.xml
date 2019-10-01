@@ -8,14 +8,13 @@
 	<bean
 		class="com.redhat.samples.blackjack.processor.StatusProcessorPost"
 		id="statusProcessorPost" />
-		<bean
-		class="com.redhat.samples.blackjack.processor.UserProcessor"
+	<bean class="com.redhat.samples.blackjack.processor.UserProcessor"
 		id="userProcessor" />
-	
+
 	<camelContext
 		id="context-7d7f2df9-2d0a-476c-aedc-c96baafcc1e2"
 		xmlns="http://camel.apache.org/schema/spring">
-		
+
 		<onException>
 			<exception>java.lang.Exception</exception>
 			<handled>
@@ -28,7 +27,7 @@
 				<simple>${exception.message}</simple>
 			</setBody>
 		</onException>
-		
+
 		<restConfiguration apiContextPath="/openapi.json"
 			component="servlet" />
 		<rest apiDocs="true" enableCORS="true"
@@ -98,9 +97,9 @@
 				uri="direct:postStatus" />
 			<to id="_bean_status_setDates"
 				uri="class:com.redhat.samples.blackjack.processor.StatusProcessorPost?method=setDates" />
-			
+
 			<log message="Changing game boolean state to: ${body.started}" />
-			
+
 			<choice>
 				<when>
 					<simple>${body.started} == 'true'</simple>
@@ -115,24 +114,34 @@
 					</setHeader>
 				</when>
 			</choice>
-			
+
 			<to id="_to_sql_update"
 				uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dataSource" />
 			<!-- <process id="_process_sql_update" ref="statusProcessor"/> -->
 			<log message="Game state changed!" />
-			
+
 		</route>
-		
+
 		<route id="route-getUserInfo">
 			<from id="from-getUserInfo" uri="direct:getUserInfo" />
-			
+
 			<to id="_bean_user_getUser"
 				uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=getUser" />
-			<log message="Direct Login: UID ${body.uid}" />
-			<log message="Getting User Data: UID ${body.uid}, Token key:" />
-			
-		</route>
+			<log message="Get OBP Token (Direct Login)..." />
+<!-- 			<setHeader headerName="Authorization"> -->
+<!-- 				<constant>DirectLogin username="{{obp.username}}",password="{{obp.userpassword}}",consumer_key="{{obp.consumerkey}}"</constant> -->
+<!-- 			</setHeader> -->
+<!-- 			<log message="Header Auth: {{obp.endpointurl}}" /> -->
+<!-- 			<setHeader headerName="CamelHttpMethod"> -->
+<!-- 		        <constant>POST</constant> -->
+<!-- 		    </setHeader> -->
+<!-- 			<to -->
+<!-- 				uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false" /> -->
 		
+<!-- 			<log message="Token key: ${body}" /> -->
+
+		</route>
+
 		<route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
 			<from id="from-d80096be-dc9a-4938-8d93-ae711b733177"
 				uri="direct:rest5" />

@@ -64,8 +64,11 @@ LOGGEDIN_USER=$(oc $ARG_OC_OPS whoami)
 OPENSHIFT_USER=${ARG_USERNAME:-$LOGGEDIN_USER}
 #PRJ_SUFFIX=${ARG_PROJECT_SUFFIX:-`echo $OPENSHIFT_USER | sed -e 's/[-@].*//g'`}
 PRJ_SUFFIX=$(date '+%Y%m%d')
-GITHUB_ACCOUNT=${GITHUB_ACCOUNT:-tgubeli}
-GITHUB_REF=${GITHUB_REF:-master}
+GIT_ACCOUNT=${GITHUB_ACCOUNT:-tgubeli}
+GIT_REF=${GITHUB_REF:-master}
+GIT_API_URL=https://github.com/tgubeli/blackjack.git
+
+
 
 function deploy() {
   oc $ARG_OC_OPS new-project blackjack-$PRJ_SUFFIX   --display-name="BlackJack Game"
@@ -94,6 +97,15 @@ function deploy() {
   sleep 10
 
   #deploy web app
+  echo "Updating Fuse 7 image streams..."
+  oc apply -f https://raw.githubusercontent.com/jboss-fuse/application-templates/master/fis-image-streams.json -n openshift
+  # oc apply -f https://raw.githubusercontent.com/jboss-fuse/application-templates/master/quickstarts/spring-boot-camel-template.json
+  sleep 15
+  echo "Fuse 7 image streams updated."
+  echo "Deploying Blackjack API..."
+  oc new-app fuse7-java-openshift:1.4$GIT_API_URL#GIT_REF --context-dir=blackjack-project name=blackjack-api
+  # oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-project name=blackjack-api
+  # oc new-app --template=blackjack-20190923/s2i-fuse74-spring-boot-camel --param=APP_NAME=blackjack-api --param=GIT_REPO=https://github.com/tgubeli/blackjack.git --param=GIT_REF=master --param=MODULE_DIR=blackjack-project
 
 }
 
