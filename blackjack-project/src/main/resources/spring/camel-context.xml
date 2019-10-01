@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+	<bean
+		class="com.redhat.samples.blackjack.processor.StatusProcessor"
+		id="statusProcessor" />
+	<bean
+		class="com.redhat.samples.blackjack.processor.StatusProcessorPost"
+		id="statusProcessorPost" />
+		<bean
+		class="com.redhat.samples.blackjack.processor.UserProcessor"
+		id="userProcessor" />
+	
+	<camelContext
+		id="context-7d7f2df9-2d0a-476c-aedc-c96baafcc1e2"
+		xmlns="http://camel.apache.org/schema/spring">
+		
+		<onException>
+			<exception>java.lang.Exception</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+				<constant>500</constant>
+			</setHeader>
+			<setBody>
+				<simple>${exception.message}</simple>
+			</setBody>
+		</onException>
+		
+		<restConfiguration apiContextPath="/openapi.json"
+			component="servlet" />
+		<rest apiDocs="true" enableCORS="true"
+			id="rest-for-openapi-document" path="/blackjack/api">
+			<get id="openapi.json" produces="application/json">
+				<description>Gets the OpenAPI document for this service</description>
+				<route id="route-for-openapi-document">
+					<setHeader headerName="Exchange.CONTENT_TYPE"
+						id="setHeader-for-openapi-document">
+						<constant>application/vnd.oai.openapi+json</constant>
+					</setHeader>
+					<setBody id="setBody-for-openapi-document">
+						<constant>resource:classpath:openapi.json</constant>
+					</setBody>
+				</route>
+			</get>
+		</rest>
+		<rest apiDocs="true" bindingMode="auto" enableCORS="true"
+			id="rest-5c49d93f-50f8-40f4-8373-093ecb910f58"
+			produces="application/json">
+			<!-- <get id="get-64c9c304-dd94-4a58-a594-e2eb154641a6" uri="/blackjack/api"> -->
+			<!-- <description>Returns API documentation (Open API 3 format)</description> -->
+			<!-- <to uri="direct:rest1"/> -->
+			<!-- </get> -->
+			<get id="get-deeb5904-b0e9-40cf-bd49-fddaf0e4b290"
+				produces="application/json" uri="/blackjack/status">
+				<to uri="direct:getStatus" />
+			</get>
+			<post bindingMode="json"
+				id="post-f7733461-141f-49be-8e7c-c64bdb26e09a"
+				type="com.redhat.samples.blackjack.model.Status"
+				uri="/blackjack/status">
+				<to uri="direct:postStatus" />
+			</post>
+			<get id="get-8650bf08-5ede-41b5-9076-08f9f4068547"
+				uri="/blackjack/user">
+				<description>Get user account info through his email. In case that the email doesn't exists, a new user account is created with a default balance amount.</description>
+				<to uri="direct:getUserInfo" />
+			</get>
+			<post id="post-2f382067-2ee2-4f88-b543-534010e64c56"
+				uri="/blackjack/user/payment">
+				<to uri="direct:rest5" />
+			</post>
+			<get id="get-26fa5cde-b9d9-449f-800a-ad167df4e031"
+				uri="/blackjack/user/ranking">
+				<description>Returns top 10 players of the game ordered by the amount won in the game.</description>
+				<to uri="direct:rest6" />
+			</get>
+		</rest>
+		<route id="route-1d0e1de8-838d-41df-a0c0-6b74c766faab">
+			<from id="from-2b5b918f-09b4-4663-9168-116aa1883f00"
+				uri="direct:rest1" />
+			<to id="to-e77bb889-e5d5-4da3-a716-ab55cd8f9295" uri="direct:501" />
+		</route>
+		<route id="route-0a29916f-9ade-4441-8ca9-f92ecb776b8e"
+			streamCache="true">
+			<from id="from-c5dde5b1-88ac-420a-bedc-28fa55c7f1c4"
+				uri="direct:getStatus" />
+			<to id="_to_sql_select"
+				uri="sql:select * from status ORDER BY changed_at DESC LIMIT 1?dataSource=#dataSource" />
+			<process id="_process_sql_select" ref="statusProcessor" />
+			<log id="_log2" message="Status: ${body.started}" />
+		</route>
+		<route id="route-49940848-1c18-45c4-9a45-659fc07b1fdd"
+			streamCache="true">
+			<from id="from-68780394-7963-44d5-afd8-83d6a6bda4d5"
+				uri="direct:postStatus" />
+			<to id="_bean_status_setDates"
+				uri="class:com.redhat.samples.blackjack.processor.StatusProcessorPost?method=setDates" />
+			
+			<log message="Changing game boolean state to: ${body.started}" />
+			
+			<choice>
+				<when>
+					<simple>${body.started} == 'true'</simple>
+					<setHeader headerName="started">
+						<constant>1</constant>
+					</setHeader>
+				</when>
+				<when>
+					<simple>${body.started} == 'false'</simple>
+					<setHeader headerName="started">
+						<constant>0</constant>
+					</setHeader>
+				</when>
+			</choice>
+			
+			<to id="_to_sql_update"
+				uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dataSource" />
+			<!-- <process id="_process_sql_update" ref="statusProcessor"/> -->
+			<log message="Game state changed!" />
+			
+		</route>
+		
+		<route id="route-getUserInfo">
+			<from id="from-getUserInfo" uri="direct:getUserInfo" />
+			
+			<to id="_bean_user_getUser"
+				uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=getUser" />
+			<log message="Direct Login: UID ${body.uid}" />
+			<log message="Getting User Data: UID ${body.uid}, Token key:" />
+			
+		</route>
+		
+		<route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
+			<from id="from-d80096be-dc9a-4938-8d93-ae711b733177"
+				uri="direct:rest5" />
+			<to id="to-7d613824-3ee3-47c3-a345-b3c2a3b3a2de" uri="direct:501" />
+		</route>
+		<route id="route-d279e40d-d770-4bf3-b9a1-aa4b2cdc1e63">
+			<from id="from-42df915b-4c7a-4ffe-a49f-c7695f92d4d1"
+				uri="direct:rest6" />
+			<to id="to-112d9122-3c9d-46fb-9755-ec5d6df7fb2e" uri="direct:501" />
+		</route>
+		<route id="route-for-unimplemented-operations">
+			<from id="from-for-unimplemented-operations-route"
+				uri="direct:501" />
+			<log id="log-for-unimplemented-operations-route"
+				message="API operation not yet implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}" />
+			<setHeader headerName="Exchange.HTTP_RESPONSE_CODE"
+				id="setHeader-for-unimplemented-operations-route">
+				<constant>501</constant>
+			</setHeader>
+			<setBody id="setBody-for-unimplemented-operations-route">
+				<simple>API operation not implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}</simple>
+			</setBody>
+		</route>
+	</camelContext>
+</beans>
