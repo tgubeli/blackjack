@@ -22,7 +22,7 @@ public class UserProcessor {
 	        	user.setEmail(queryString.split("=")[1]);
 	        	user.setUid("12345678");
 	        	Account account = new Account();
-	        	Balance balance = new Balance(1230l, "USD");
+	        	Balance balance = new Balance(1235l, "USD");
 	        	account.setAcid("12345678");
 	        	account.setBalance(balance);
 	        	user.setAccount(account);
