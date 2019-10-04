@@ -1,169 +1,267 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
-	<bean
-		class="com.redhat.samples.blackjack.processor.StatusProcessor"
-		id="statusProcessor" />
-	<bean
-		class="com.redhat.samples.blackjack.processor.StatusProcessorPost"
-		id="statusProcessorPost" />
-	<bean class="com.redhat.samples.blackjack.processor.UserProcessor"
-		id="userProcessor" />
-
-	<camelContext
-		id="context-7d7f2df9-2d0a-476c-aedc-c96baafcc1e2"
-		xmlns="http://camel.apache.org/schema/spring">
-
-		<onException>
-			<exception>java.lang.Exception</exception>
-			<handled>
-				<constant>true</constant>
-			</handled>
-			<setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
-				<constant>500</constant>
-			</setHeader>
-			<setBody>
-				<simple>${exception.message}</simple>
-			</setBody>
-		</onException>
-
-		<restConfiguration apiContextPath="/openapi.json"
-			component="servlet" />
-		<rest apiDocs="true" enableCORS="true"
-			id="rest-for-openapi-document" path="/blackjack/api">
-			<get id="openapi.json" produces="application/json">
-				<description>Gets the OpenAPI document for this service</description>
-				<route id="route-for-openapi-document">
-					<setHeader headerName="Exchange.CONTENT_TYPE"
-						id="setHeader-for-openapi-document">
-						<constant>application/vnd.oai.openapi+json</constant>
-					</setHeader>
-					<setBody id="setBody-for-openapi-document">
-						<constant>resource:classpath:openapi.json</constant>
-					</setBody>
-				</route>
-			</get>
-		</rest>
-		<rest apiDocs="true" bindingMode="auto" enableCORS="true"
-			id="rest-5c49d93f-50f8-40f4-8373-093ecb910f58"
-			produces="application/json">
-			<!-- <get id="get-64c9c304-dd94-4a58-a594-e2eb154641a6" uri="/blackjack/api"> -->
-			<!-- <description>Returns API documentation (Open API 3 format)</description> -->
-			<!-- <to uri="direct:rest1"/> -->
-			<!-- </get> -->
-			<get id="get-deeb5904-b0e9-40cf-bd49-fddaf0e4b290"
-				produces="application/json" uri="/blackjack/status">
-				<to uri="direct:getStatus" />
-			</get>
-			<post bindingMode="json"
-				id="post-f7733461-141f-49be-8e7c-c64bdb26e09a"
-				type="com.redhat.samples.blackjack.model.Status"
-				uri="/blackjack/status">
-				<to uri="direct:postStatus" />
-			</post>
-			<get id="get-8650bf08-5ede-41b5-9076-08f9f4068547"
-				uri="/blackjack/user">
-				<description>Get user account info through his email. In case that the email doesn't exists, a new user account is created with a default balance amount.</description>
-				<to uri="direct:getUserInfo" />
-			</get>
-			<post id="post-2f382067-2ee2-4f88-b543-534010e64c56"
-				uri="/blackjack/user/payment">
-				<to uri="direct:rest5" />
-			</post>
-			<get id="get-26fa5cde-b9d9-449f-800a-ad167df4e031"
-				uri="/blackjack/user/ranking">
-				<description>Returns top 10 players of the game ordered by the amount won in the game.</description>
-				<to uri="direct:rest6" />
-			</get>
-		</rest>
-		<route id="route-1d0e1de8-838d-41df-a0c0-6b74c766faab">
-			<from id="from-2b5b918f-09b4-4663-9168-116aa1883f00"
-				uri="direct:rest1" />
-			<to id="to-e77bb889-e5d5-4da3-a716-ab55cd8f9295" uri="direct:501" />
-		</route>
-		<route id="route-0a29916f-9ade-4441-8ca9-f92ecb776b8e"
-			streamCache="true">
-			<from id="from-c5dde5b1-88ac-420a-bedc-28fa55c7f1c4"
-				uri="direct:getStatus" />
-			<to id="_to_sql_select"
-				uri="sql:select * from status ORDER BY changed_at DESC LIMIT 1?dataSource=#dataSource" />
-			<process id="_process_sql_select" ref="statusProcessor" />
-			<log id="_log2" message="Status: ${body.started}" />
-		</route>
-		<route id="route-49940848-1c18-45c4-9a45-659fc07b1fdd"
-			streamCache="true">
-			<from id="from-68780394-7963-44d5-afd8-83d6a6bda4d5"
-				uri="direct:postStatus" />
-			<to id="_bean_status_setDates"
-				uri="class:com.redhat.samples.blackjack.processor.StatusProcessorPost?method=setDates" />
-
-			<log message="Changing game boolean state to: ${body.started}" />
-
-			<choice>
-				<when>
-					<simple>${body.started} == 'true'</simple>
-					<setHeader headerName="started">
-						<constant>1</constant>
-					</setHeader>
-				</when>
-				<when>
-					<simple>${body.started} == 'false'</simple>
-					<setHeader headerName="started">
-						<constant>0</constant>
-					</setHeader>
-				</when>
-			</choice>
-
-			<to id="_to_sql_update"
-				uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dataSource" />
-			<!-- <process id="_process_sql_update" ref="statusProcessor"/> -->
-			<log message="Game state changed!" />
-
-		</route>
-
-		<route id="route-getUserInfo">
-			<from id="from-getUserInfo" uri="direct:getUserInfo" />
-
-			<to id="_bean_user_getUser"
-				uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=getUser" />
-			<log message="Get OBP Token (Direct Login)..." />
-<!-- 			<setHeader headerName="Authorization"> -->
-<!-- 				<constant>DirectLogin username="{{obp.username}}",password="{{obp.userpassword}}",consumer_key="{{obp.consumerkey}}"</constant> -->
-<!-- 			</setHeader> -->
-<!-- 			<log message="Header Auth: {{obp.endpointurl}}" /> -->
-<!-- 			<setHeader headerName="CamelHttpMethod"> -->
-<!-- 		        <constant>POST</constant> -->
-<!-- 		    </setHeader> -->
-<!-- 			<to -->
-<!-- 				uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false" /> -->
-		
-<!-- 			<log message="Token key: ${body}" /> -->
-
-		</route>
-
-		<route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
-			<from id="from-d80096be-dc9a-4938-8d93-ae711b733177"
-				uri="direct:rest5" />
-			<to id="to-7d613824-3ee3-47c3-a345-b3c2a3b3a2de" uri="direct:501" />
-		</route>
-		<route id="route-d279e40d-d770-4bf3-b9a1-aa4b2cdc1e63">
-			<from id="from-42df915b-4c7a-4ffe-a49f-c7695f92d4d1"
-				uri="direct:rest6" />
-			<to id="to-112d9122-3c9d-46fb-9755-ec5d6df7fb2e" uri="direct:501" />
-		</route>
-		<route id="route-for-unimplemented-operations">
-			<from id="from-for-unimplemented-operations-route"
-				uri="direct:501" />
-			<log id="log-for-unimplemented-operations-route"
-				message="API operation not yet implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}" />
-			<setHeader headerName="Exchange.HTTP_RESPONSE_CODE"
-				id="setHeader-for-unimplemented-operations-route">
-				<constant>501</constant>
-			</setHeader>
-			<setBody id="setBody-for-unimplemented-operations-route">
-				<simple>API operation not implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}</simple>
-			</setBody>
-		</route>
-	</camelContext>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean class="com.redhat.samples.blackjack.processor.StatusProcessor" id="statusProcessor"/>
+    <bean
+        class="com.redhat.samples.blackjack.processor.StatusProcessorPost" id="statusProcessorPost"/>
+    <bean class="com.redhat.samples.blackjack.processor.UserProcessor" id="userProcessor"/>
+    <camelContext id="context-7d7f2df9-2d0a-476c-aedc-c96baafcc1e2" xmlns="http://camel.apache.org/schema/spring">
+        <dataFormats>
+            <json id="jack-token" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.AuthToken"/>
+            <json id="jack-obp-user" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpUser"/>
+            <json id="jack-obp-customer" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpCustomer"/>
+            <json id="jack-json" include="NON_NULL" library="Jackson" prettyPrint="true"/>
+        </dataFormats>
+        <onException>
+            <exception>java.lang.Exception</exception>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+                <constant>500</constant>
+            </setHeader>
+            <setBody>
+                <simple>${exception.message}</simple>
+            </setBody>
+        </onException>
+        <restConfiguration apiContextPath="/openapi.json" component="servlet"/>
+        <rest apiDocs="true" enableCORS="true"
+            id="rest-for-openapi-document" path="/blackjack/api">
+            <get id="openapi.json" produces="application/json">
+                <description>Gets the OpenAPI document for this service</description>
+                <route id="route-for-openapi-document">
+                    <setHeader headerName="Exchange.CONTENT_TYPE" id="setHeader-for-openapi-document">
+                        <constant>application/vnd.oai.openapi+json</constant>
+                    </setHeader>
+                    <setBody id="setBody-for-openapi-document">
+                        <constant>resource:classpath:openapi.json</constant>
+                    </setBody>
+                </route>
+            </get>
+        </rest>
+        <rest apiDocs="true" bindingMode="auto" enableCORS="true"
+            id="rest-5c49d93f-50f8-40f4-8373-093ecb910f58" produces="application/json">
+            <!-- <get id="get-64c9c304-dd94-4a58-a594-e2eb154641a6" uri="/blackjack/api"> -->
+            <!-- <description>Returns API documentation (Open API 3 format)</description> -->
+            <!-- <to uri="direct:rest1"/> -->
+            <!-- </get> -->
+            <get id="get-deeb5904-b0e9-40cf-bd49-fddaf0e4b290"
+                produces="application/json" uri="/blackjack/status">
+                <to uri="direct:getStatus"/>
+            </get>
+            <post bindingMode="json"
+                id="post-f7733461-141f-49be-8e7c-c64bdb26e09a"
+                type="com.redhat.samples.blackjack.model.Status" uri="/blackjack/status">
+                <to uri="direct:postStatus"/>
+            </post>
+            <get id="get-8650bf08-5ede-41b5-9076-08f9f4068547" uri="/blackjack/user">
+                <description>Get user account info through his email. In case that the email doesn't exists, a new user account is created with a default balance amount.</description>
+                <to uri="direct:getUserLogin"/>
+            </get>
+            <post id="post-2f382067-2ee2-4f88-b543-534010e64c56" uri="/blackjack/user/payment">
+                <to uri="direct:rest5"/>
+            </post>
+            <get id="get-26fa5cde-b9d9-449f-800a-ad167df4e031" uri="/blackjack/user/ranking">
+                <description>Returns top 10 players of the game ordered by the amount won in the game.</description>
+                <to uri="direct:rest6"/>
+            </get>
+        </rest>
+        <route id="route-1d0e1de8-838d-41df-a0c0-6b74c766faab">
+            <from id="from-2b5b918f-09b4-4663-9168-116aa1883f00" uri="direct:rest1"/>
+            <to id="to-e77bb889-e5d5-4da3-a716-ab55cd8f9295" uri="direct:501"/>
+        </route>
+        <route id="route-0a29916f-9ade-4441-8ca9-f92ecb776b8e" streamCache="true">
+            <from id="from-c5dde5b1-88ac-420a-bedc-28fa55c7f1c4" uri="direct:getStatus"/>
+            <to id="_to_sql_select" uri="sql:select * from status ORDER BY changed_at DESC LIMIT 1?dataSource=#dataSource"/>
+            <process id="_process_sql_select" ref="statusProcessor"/>
+            <log id="_log2" message="Status: ${body.started}"/>
+        </route>
+        <route id="route-49940848-1c18-45c4-9a45-659fc07b1fdd" streamCache="true">
+            <from id="from-68780394-7963-44d5-afd8-83d6a6bda4d5" uri="direct:postStatus"/>
+            <to id="_bean_status_setDates" uri="class:com.redhat.samples.blackjack.processor.StatusProcessorPost?method=setDates"/>
+            <log id="_log1" message="Changing game boolean state to: ${body.started}"/>
+            <choice id="_choice1">
+                <when id="_when1">
+                    <simple>${body.started} == 'true'</simple>
+                    <setHeader headerName="started" id="_setHeader1">
+                        <constant>1</constant>
+                    </setHeader>
+                </when>
+                <when id="_when2">
+                    <simple>${body.started} == 'false'</simple>
+                    <setHeader headerName="started" id="_setHeader2">
+                        <constant>0</constant>
+                    </setHeader>
+                </when>
+            </choice>
+            <to id="_to_sql_update" uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dataSource"/>
+            <!-- <process id="_process_sql_update" ref="statusProcessor"/> -->
+            <log id="_log3" message="Game state changed!"/>
+        </route>
+        <route id="route-getUserLogin" streamCache="true">
+            <from id="from-getUserLogin" uri="direct:getUserLogin"/>
+            <to id="_to1" uri="direct:getToken"/>
+            <to id="_to2" uri="direct:getUserInfo"/>
+            <choice id="_choice2">
+                <when id="_when3">
+                    <!-- USER NOT FOUND -->
+                    <simple>${bodyAs(String)} contains 'OBP-20027'</simple>
+                    <!-- CREATE USER LOGIC HERE (CREATE USER, CUSTOMER, LINK CUSTOMER AND USER, ACCOUNT, THEN GET USER) -->
+                    <log id="_log9" message="User not found! Creating new User account for ${exchangeProperty[email]} ..."/>
+                    <to id="_to4" uri="direct:createUser"/>
+                    <to id="_to5" uri="direct:createCustomer"/>
+                    <to id="_to3" uri="direct:createUserCustomer"/>
+                    <to id="_to11" uri="direct:createAccount"/>
+                    <to id="_to12" uri="direct:getUserInfo"/>
+                    <log id="_log4" message="User Created: ${body}"/>
+                </when>
+                <otherwise id="_otherwise1">
+                    <log id="_log5" message="User Exists: ${body}"/>
+                </otherwise>
+            </choice>
+            <unmarshal id="_unmarshal2">
+                <custom ref="jack-obp-user"/>
+            </unmarshal>
+        </route>
+        <route id="route-getUserInfo" streamCache="true">
+            <from id="from-getUserInfo" uri="direct:getUserInfo"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader3">
+                <constant>GET</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader4">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setBody id="_setBody1">
+                <constant/>
+            </setBody>
+            <log id="_log6" message="Getting user info for '${exchangeProperty[email]}' ..."/>
+            <toD id="_toD1" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/users/username/${exchangeProperty[email]}?throwExceptionOnFailure=false"/>
+            <log id="_log7" message="User info response: ${bodyAs(String)}"/>
+        </route>
+        <route id="route-get-token" streamCache="true">
+            <from id="from-get-token" uri="direct:getToken"/>
+            <log id="_log8" message="Get OBP Token (Direct Login)..."/>
+            <setHeader headerName="Authorization" id="_setHeader5">
+                <constant>DirectLogin username="{{obp.username}}",password="{{obp.userpassword}}",consumer_key="{{obp.consumerkey}}"</constant>
+            </setHeader>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader6">
+                <constant>POST</constant>
+            </setHeader>
+            <to id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false"/>
+            <unmarshal id="_unmarshal1">
+                <custom ref="jack-token"/>
+            </unmarshal>
+            <log id="_log12" message="Token key: ${body.token}"/>
+            <to id="_to14" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setEmailProperty"/>
+            <setProperty id="_setProperty1" propertyName="ObpToken">
+                <simple>${body.token}</simple>
+            </setProperty>
+        </route>
+        <route id="route-create-user" streamCache="true">
+            <from id="from-create-user" uri="direct:createUser"/>
+            <log id="_log13" message="Creating User '${exchangeProperty[email]}'..."/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader8">
+                <constant>GET</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader9">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader10">
+                <simple>application/json</simple>
+            </setHeader>
+            <removeHeaders
+                excludePattern="Authorization|CamelHttpMethod|ObpToken|Content-Type"
+                id="_removeHeaders1" pattern="*"/>
+            <to id="_to6" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoUserOBP"/>
+            <marshal id="_marshal1" ref="jack-json"/>
+            <to id="_to7" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/users"/>
+            <unmarshal id="_unmarshal3">
+                <custom ref="jack-obp-user"/>
+            </unmarshal>
+            <setProperty id="_setProperty3" propertyName="userId">
+                <simple>${body.userId}</simple>
+            </setProperty>
+        </route>
+        <route id="route-create-customer" streamCache="true">
+            <from id="from-create-customer" uri="direct:createCustomer"/>
+            <log id="_log10" message="Creating Customer for User '${exchangeProperty[email]}'..."/>
+            <to id="_to8" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoOBPCustomer"/>
+            <marshal id="_marshal2" ref="jack-json"/>
+            <removeHeaders id="_removeHeaders2" pattern="*"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader11">
+                <constant>POST</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader12">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader13">
+                <simple>application/json</simple>
+            </setHeader>
+            <log id="_log11" message="DirectLogin token=${exchangeProperty[ObpToken]}"/>
+            <to id="_to9" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/banks/psd201-bank-x--uk/customers?throwExceptionOnFailure=false"/>
+            <unmarshal id="_unmarshal4">
+                <custom ref="jack-obp-customer"/>
+            </unmarshal>
+            <setProperty id="_setProperty2" propertyName="customerId">
+                <simple>${body.customerId}</simple>
+            </setProperty>
+        </route>
+        <route id="route-create-user-customer" streamCache="true">
+            <from id="from-create-user-customer" uri="direct:createUserCustomer"/>
+            <log id="_log14" message="Creating Link between User and Customer for Email '${exchangeProperty[email]}'..."/>
+            <to id="_to10" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoOBPUserCustomer"/>
+            <marshal id="_marshal3" ref="jack-json"/>
+            <removeHeaders id="_removeHeaders3" pattern="*"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader7">
+                <constant>POST</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader14">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader15">
+                <simple>application/json</simple>
+            </setHeader>
+            <to id="_to15" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/banks/psd201-bank-x--uk/user_customer_links?throwExceptionOnFailure=false"/>
+        </route>
+        <route id="route-create-account" streamCache="true">
+            <from id="from-create-account" uri="direct:createAccount"/>
+            <log id="_log15" message="Creating Account for User '${exchangeProperty[email]}'..."/>
+            <setProperty id="_setProperty4" propertyName="balanceInitAmount">
+                <simple>{{obp.balance.amount}}</simple>
+            </setProperty>
+            <to id="_to16" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoOBPAccount"/>
+            <marshal id="_marshal4" ref="jack-json"/>
+            <removeHeaders id="_removeHeaders4" pattern="*"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader16">
+                <constant>PUT</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader17">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader18">
+                <simple>application/json</simple>
+            </setHeader>
+            <log id="_log16" message="UID: ${exchangeProperty[userId]}"/>
+            <toD id="_toD2" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/banks/psd201-bank-x--uk/accounts/${exchangeProperty[labelId]}?throwExceptionOnFailure=false"/>
+            <log id="_log17" message="Body Account ${body}"/>
+        </route>
+        <route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
+            <from id="from-d80096be-dc9a-4938-8d93-ae711b733177" uri="direct:rest5"/>
+            <to id="to-7d613824-3ee3-47c3-a345-b3c2a3b3a2de" uri="direct:501"/>
+        </route>
+        <route id="route-d279e40d-d770-4bf3-b9a1-aa4b2cdc1e63">
+            <from id="from-42df915b-4c7a-4ffe-a49f-c7695f92d4d1" uri="direct:rest6"/>
+            <to id="to-112d9122-3c9d-46fb-9755-ec5d6df7fb2e" uri="direct:501"/>
+        </route>
+        <route id="route-for-unimplemented-operations">
+            <from id="from-for-unimplemented-operations-route" uri="direct:501"/>
+            <log id="log-for-unimplemented-operations-route" message="API operation not yet implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}"/>
+            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE" id="setHeader-for-unimplemented-operations-route">
+                <constant>501</constant>
+            </setHeader>
+            <setBody id="setBody-for-unimplemented-operations-route">
+                <simple>API operation not implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}</simple>
+            </setBody>
+        </route>
+    </camelContext>
 </beans>

@@ -19,9 +19,9 @@ endpoints:
     
 #OBP values
 obp:
-  username: john
-  userpassword: Treedom#894
-  consumerkey: u14yqghbe1ujohit2nykqr0hntkmodh1ubhn1zn1
+  username: demo
+  userpassword: Treedom#112
+  consumerkey: l4hnl0ivld1f55knjjwoxtrur2c2qvljlulsc2st
   endpointurl: obpapi-service-demojam.apps.chile-b5a8.open.redhat.com
 
     
