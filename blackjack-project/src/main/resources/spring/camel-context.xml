@@ -113,6 +113,7 @@
                     <to id="_to3" uri="direct:createUserCustomer"/>
                     <to id="_to11" uri="direct:createAccount"/>
                     <to id="_to12" uri="direct:getUserInfo"/>
+                    <to uri="direct:scaleUpPod"/>
                     <log id="_log4" message="User Created: ${body}"/>
                 </when>
                 <otherwise id="_otherwise1">
@@ -244,6 +245,19 @@
             <log id="_log16" message="UID: ${exchangeProperty[userId]}"/>
             <toD id="_toD2" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/banks/psd201-bank-x--uk/accounts/${exchangeProperty[labelId]}?throwExceptionOnFailure=false"/>
             <log id="_log17" message="Body Account ${body}"/>
+        </route>
+        <route id="route-scale-up" streamCache="true"> 
+        	<from id="from-scale-up" uri="direct:scaleUpPod"/>
+<!--         	<toD id="to-create-pod" uri="kubernetes-pods://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace={{ocp.bjnamespace}}&amp;operation=createPod" /> -->
+        	<setHeader headerName="CamelKubernetesReplicationControllerReplicas">
+        		<constant>2</constant>
+        	</setHeader>
+        	<setHeader headerName="CamelKubernetesReplicationControllerName">
+        		<constant>2</constant>
+        	</setHeader>
+        	
+        	<toD id="to-scale-up-rc" uri="kubernetes-replication-controllers://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace={{ocp.bjnamespace}}&amp;operation=scaleReplicationController" />
+        	
         </route>
         <route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
             <from id="from-d80096be-dc9a-4938-8d93-ae711b733177" uri="direct:rest5"/>

@@ -25,6 +25,12 @@ obp:
   endpointurl: obpapi-service-demojam.apps.chile-b5a8.open.redhat.com
   balance:
     amount: 1000
+    
+#OCP values
+ocp:
+  endpointurl: https://master.scldemo-4599.open.redhat.com
+  logintoken: 5EnurTglp7LkE3XZ4_0VnypR8g0PWubsRR3MwXY74eA
+  bjnamespace: blackjack-20191007
 
     
 mysql:
