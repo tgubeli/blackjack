@@ -169,6 +169,7 @@
         <route id="route-create-user" streamCache="true">
             <from id="from-create-user" uri="direct:createUser"/>
             <log id="_log13" message="Creating User '${exchangeProperty[email]}'..."/>
+            <log id="_log13" message="Token: '${exchangeProperty[ObpToken]}'..."/>
             <setHeader headerName="CamelHttpMethod" id="_setHeader8">
                 <constant>GET</constant>
             </setHeader>
@@ -178,6 +179,9 @@
             <setHeader headerName="Content-Type" id="_setHeader10">
                 <simple>application/json</simple>
             </setHeader>
+            <setProperty propertyName="userdefaultpassword">
+                <simple>{{obp.userDefaultPass}}</simple>
+            </setProperty>
             <removeHeaders
                 excludePattern="Authorization|CamelHttpMethod|ObpToken|Content-Type"
                 id="_removeHeaders1" pattern="*"/>
