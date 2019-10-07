@@ -21,8 +21,10 @@ endpoints:
 obp:
   username: demo
   userpassword: Treedom#112
+  userDefaultPass: Demojam123!
   consumerkey: l4hnl0ivld1f55knjjwoxtrur2c2qvljlulsc2st
   endpointurl: obpapi-service-demojam.apps.chile-b5a8.open.redhat.com
+  bankDefaultName: psd201-bank-x--uk
   balance:
     amount: 1000
     

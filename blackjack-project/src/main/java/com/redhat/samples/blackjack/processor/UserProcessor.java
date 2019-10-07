@@ -47,6 +47,7 @@ public class UserProcessor {
 		try{
 			
 			String email = (String) exchange.getProperty("email");
+			String defaultPassword = (String) exchange.getProperty("userdefaultpassword");
 			ObpUserData obpUserData = new ObpUserData();
 	    	
 	        if(email!=null) {
@@ -55,7 +56,7 @@ public class UserProcessor {
 	        	obpUserData.setUsername(email);
 	        	obpUserData.setFirstName("Demo Jam");
 	        	obpUserData.setLastName("Dummy Name");
-	        	obpUserData.setPassword("Demojam123!");
+	        	obpUserData.setPassword(defaultPassword);
 	        	
 	        }else {
 	        	throw new Exception("Malformed URL. User Name or Email not present in Payload Header. ");

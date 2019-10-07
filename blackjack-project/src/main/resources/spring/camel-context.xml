@@ -100,6 +100,12 @@
         </route>
         <route id="route-getUserLogin" streamCache="true">
             <from id="from-getUserLogin" uri="direct:getUserLogin"/>
+            <setProperty id="_setProperty5" propertyName="obpUsername">
+                <simple>{{obp.username}}</simple>
+            </setProperty>
+            <setProperty id="_setProperty6" propertyName="obpPassword">
+                <simple>{{obp.userpassword}}</simple>
+            </setProperty>
             <to id="_to1" uri="direct:getToken"/>
             <to id="_to2" uri="direct:getUserInfo"/>
             <choice id="_choice2">
@@ -112,8 +118,10 @@
                     <to id="_to5" uri="direct:createCustomer"/>
                     <to id="_to3" uri="direct:createUserCustomer"/>
                     <to id="_to11" uri="direct:createAccount"/>
+                    <!-- add 1000 dollars to the new account balance -->
+<!--                     <to id="_to11" uri="direct:doTransfer"/> -->
                     <to id="_to12" uri="direct:getUserInfo"/>
-                    <to uri="direct:scaleUpPod"/>
+                    <!--                     <to uri="direct:scaleUpPod"/> -->
                     <log id="_log4" message="User Created: ${body}"/>
                 </when>
                 <otherwise id="_otherwise1">
@@ -143,7 +151,7 @@
             <from id="from-get-token" uri="direct:getToken"/>
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
             <setHeader headerName="Authorization" id="_setHeader5">
-                <constant>DirectLogin username="{{obp.username}}",password="{{obp.userpassword}}",consumer_key="{{obp.consumerkey}}"</constant>
+                <constant>DirectLogin username="${exchangeProperty[obpUsername]}",password="${exchangeProperty[obpPassword]}",consumer_key="{{obp.consumerkey}}"</constant>
             </setHeader>
             <setHeader headerName="CamelHttpMethod" id="_setHeader6">
                 <constant>POST</constant>
@@ -243,22 +251,40 @@
                 <simple>application/json</simple>
             </setHeader>
             <log id="_log16" message="UID: ${exchangeProperty[userId]}"/>
-            <toD id="_toD2" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/banks/psd201-bank-x--uk/accounts/${exchangeProperty[labelId]}?throwExceptionOnFailure=false"/>
+            <toD id="_toD2" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/banks/{{obp.bankDefaultName}}/accounts/${exchangeProperty[labelId]}?throwExceptionOnFailure=false"/>
             <log id="_log17" message="Body Account ${body}"/>
         </route>
-        <route id="route-scale-up" streamCache="true"> 
-        	<from id="from-scale-up" uri="direct:scaleUpPod"/>
-<!--         	<toD id="to-create-pod" uri="kubernetes-pods://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace={{ocp.bjnamespace}}&amp;operation=createPod" /> -->
-        	<setHeader headerName="CamelKubernetesReplicationControllerReplicas">
-        		<constant>2</constant>
-        	</setHeader>
-        	<setHeader headerName="CamelKubernetesReplicationControllerName">
-        		<constant>blackjack-1</constant>
-        	</setHeader>
-        	
-        	
-        	<toD id="to-scale-up-rc" uri="kubernetes-replication-controllers://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace=blackjack-20191007&amp;operation=scaleReplicationController" />
-        	
+        <route id="route-do-transfer">
+            <from id="from-do-transfer" uri="direct:doTransfer"/>
+            <setProperty id="_setProperty7" propertyName="obpUsername">
+                <simple>${exchangeProperty[email]}</simple>
+            </setProperty>
+            <setProperty id="_setProperty8" propertyName="obpPassword">
+                <simple>{{obp.userDefaultPass}}</simple>
+            </setProperty>
+            <to id="_to1" uri="direct:getToken"/>
+            <setHeader headerName="Authorization" id="_setHeader19">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader20">
+                <constant>GET</constant>
+            </setHeader>
+            <!-- GET Account by User -->
+            <toD id="_toD3" uri="http4://{{obp.endpointurl}}/obp/v3.1.0/banks/{{obp.bankDefaultName}}/accounts?throwExceptionOnFailure=false"/>
+            
+        </route>
+        <route id="route-scale-up" streamCache="true">
+            <from id="from-scale-up" uri="direct:scaleUpPod"/>
+            <!--         	<toD id="to-create-pod" uri="kubernetes-pods://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace={{ocp.bjnamespace}}&amp;operation=createPod" /> -->
+            <setHeader
+                headerName="CamelKubernetesReplicationControllerReplicas" id="_setHeader21">
+                <constant>2</constant>
+            </setHeader>
+            <setHeader
+                headerName="CamelKubernetesReplicationControllerName" id="_setHeader22">
+                <constant>blackjack-1</constant>
+            </setHeader>
+            <toD id="to-scale-up-rc" uri="kubernetes-replication-controllers://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace=blackjack-20191007&amp;operation=scaleReplicationController"/>
         </route>
         <route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
             <from id="from-d80096be-dc9a-4938-8d93-ae711b733177" uri="direct:rest5"/>
