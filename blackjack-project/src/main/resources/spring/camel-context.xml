@@ -253,7 +253,7 @@
         		<constant>2</constant>
         	</setHeader>
         	<setHeader headerName="CamelKubernetesReplicationControllerName">
-        		<constant>2</constant>
+        		<constant>blackjack-1</constant>
         	</setHeader>
         	
         	<toD id="to-scale-up-rc" uri="kubernetes-replication-controllers://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace={{ocp.bjnamespace}}&amp;operation=scaleReplicationController" />
