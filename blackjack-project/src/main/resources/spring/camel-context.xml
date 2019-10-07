@@ -256,7 +256,8 @@
         		<constant>blackjack-1</constant>
         	</setHeader>
         	
-        	<toD id="to-scale-up-rc" uri="kubernetes-replication-controllers://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace={{ocp.bjnamespace}}&amp;operation=scaleReplicationController" />
+        	
+        	<toD id="to-scale-up-rc" uri="kubernetes-replication-controllers://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace=blackjack-20191007&amp;operation=scaleReplicationController" />
         	
         </route>
         <route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
