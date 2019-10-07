@@ -151,7 +151,7 @@
             <from id="from-get-token" uri="direct:getToken"/>
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
             <setHeader headerName="Authorization" id="_setHeader5">
-                <constant>DirectLogin username="${exchangeProperty[obpUsername]}",password="${exchangeProperty[obpPassword]}",consumer_key="{{obp.consumerkey}}"</constant>
+                <simple>DirectLogin username="${exchangeProperty[obpUsername]}",password="${exchangeProperty[obpPassword]}",consumer_key="{{obp.consumerkey}}"</simple>
             </setHeader>
             <setHeader headerName="CamelHttpMethod" id="_setHeader6">
                 <constant>POST</constant>

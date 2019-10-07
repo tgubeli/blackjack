@@ -193,5 +193,9 @@ public class UserProcessor {
 			throw e;
 		}
 	}
+	
+	public void getMainAccount() {
+		
+	}
 
 }
