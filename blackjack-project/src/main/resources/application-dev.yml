@@ -25,6 +25,8 @@ obp:
   consumerkey: l4hnl0ivld1f55knjjwoxtrur2c2qvljlulsc2st
   endpointurl: obpapi-service-demojam.apps.chile-b5a8.open.redhat.com
   bankDefaultName: psd201-bank-x--uk
+  homeUsername: blackjack.casino@email.com
+  homeACID: 8e9d7fef-c7d8-4cd1-8912-dd89bfd30b38-1570563558019
   balance:
     amount: 1000
   

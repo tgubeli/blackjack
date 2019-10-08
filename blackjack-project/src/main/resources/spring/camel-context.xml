@@ -13,6 +13,7 @@
             <json id="jack-obp-account" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpAccount"/>
             <json id="jack-obp-tx-response" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpTransactionResponse"/>
             <json id="jack-obp-overall-balance" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpOverallBalance"/>
+            <json id="jack-payment" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.Payment"/>
             <json id="jack-json" include="NON_NULL" library="Jackson" prettyPrint="true"/>
         </dataFormats>
         <onException>
@@ -61,8 +62,9 @@
                 <description>Get user account info through his email. In case that the email doesn't exists, a new user account is created with a default balance amount.</description>
                 <to uri="direct:getUserLogin"/>
             </get>
-            <post id="post-2f382067-2ee2-4f88-b543-534010e64c56" uri="/blackjack/user/payment">
-                <to uri="direct:rest5"/>
+            <post id="post-2f382067-2ee2-4f88-b543-534010e64c56"
+                type="com.redhat.samples.blackjack.model.Payment" uri="/blackjack/user/payment">
+                <to uri="direct:payment"/>
             </post>
             <get id="get-26fa5cde-b9d9-449f-800a-ad167df4e031" uri="/blackjack/user/ranking">
                 <description>Returns top 10 players of the game ordered by the amount won in the game.</description>
@@ -109,14 +111,12 @@
             <setProperty id="_setProperty6" propertyName="obpPassword">
                 <simple>{{obp.userpassword}}</simple>
             </setProperty>
-            <to uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setEmailProperty"/>
-            <to uri="direct:getToken"/>
+            <to id="_to1" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setEmailProperty"/>
+            <to id="_to2" uri="direct:getToken"/>
             <setProperty id="_setProperty10" propertyName="obpDefaultToken">
                 <simple>${exchangeProperty[ObpToken]}</simple>
             </setProperty>
-            
-            <to uri="direct:getUserInfo"/>
-            
+            <to id="_to14" uri="direct:getUserInfo"/>
             <choice id="_choice2">
                 <when id="_when3">
                     <!-- USER NOT FOUND -->
@@ -130,25 +130,21 @@
                     <!-- add 1000 dollars to the new account balance -->
                     <to id="_to12" uri="direct:setInitialBalance"/>
                     <!--                     <to uri="direct:scaleUpPod"/> -->
-                    <to uri="direct:getUserInfo"/>
+                    <to id="_to17" uri="direct:getUserInfo"/>
                     <log id="_log4" message="User Created: ${body}"/>
                 </when>
                 <otherwise id="_otherwise1">
                     <log id="_log5" message="User Exists: ${body}"/>
                 </otherwise>
             </choice>
-            
             <unmarshal id="_unmarshal2">
                 <custom ref="jack-obp-user"/>
             </unmarshal>
-            <setProperty propertyName="obpUser">
+            <setProperty id="_setProperty17" propertyName="obpUser">
                 <simple>${body}</simple>
             </setProperty>
-            
-            <to uri="direct:getUserAccountBalance"/>
-            
+            <to id="_to21" uri="direct:getUserAccountBalance"/>
         </route>
-        
         <route id="route-getUserInfo" streamCache="true">
             <from id="from-getUserInfo" uri="direct:getUserInfo"/>
             <setHeader headerName="CamelHttpMethod" id="_setHeader3">
@@ -160,45 +156,43 @@
             <setBody id="_setBody1">
                 <constant/>
             </setBody>
-            <log message="Getting user info for '${exchangeProperty[email]}' ..."/>
-            <toD  uri="http4://{{obp.endpointurl}}/obp/v4.0.0/users/username/${exchangeProperty[email]}?throwExceptionOnFailure=false"/>
-            <log  message="User info response: ${bodyAs(String)}"/>
-            
+            <log id="_log6" message="Getting user info for '${exchangeProperty[email]}' ..."/>
+            <toD id="_toD1" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/users/username/${exchangeProperty[email]}?throwExceptionOnFailure=false"/>
+            <log id="_log7" message="User info response: ${bodyAs(String)}"/>
         </route>
-        
         <route id="route-get-user-account" streamCache="true">
-        	<from id="from-get-user-account-balance" uri="direct:getUserAccountBalance"/>
-        	<!-- SETS Actual user for the transaction origin/from account -->
-            <setProperty propertyName="obpUsername">
+            <from id="from-get-user-account-balance" uri="direct:getUserAccountBalance"/>
+            <!-- SETS Actual user for the transaction origin/from account -->
+            <setProperty id="_setProperty18" propertyName="obpUsername">
                 <simple>${exchangeProperty[email]}</simple>
             </setProperty>
-            <setProperty propertyName="obpPassword">
+            <setProperty id="_setProperty19" propertyName="obpPassword">
                 <simple>{{obp.userDefaultPass}}</simple>
             </setProperty>
-            <setBody>
+            <setBody id="_setBody4">
                 <simple/>
             </setBody>
-            <to uri="direct:getToken"/>
-            <setHeader headerName="Authorization">
+            <to id="_to22" uri="direct:getToken"/>
+            <setHeader headerName="Authorization" id="_setHeader23">
                 <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
             </setHeader>
-            <setHeader headerName="CamelHttpMethod">
+            <setHeader headerName="CamelHttpMethod" id="_setHeader24">
                 <constant>GET</constant>
             </setHeader>
-            <setBody>
+            <setBody id="_setBody5">
                 <simple/>
             </setBody>
-            <toD uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/{{obp.bankDefaultName}}/balances?throwExceptionOnFailure=false"/>
-            <log message="${body}"/>
-            <unmarshal><custom ref="jack-obp-overall-balance"/></unmarshal>
-            <to uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setUserInfo"/>
+            <toD id="_toD4" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/{{obp.bankDefaultName}}/balances?throwExceptionOnFailure=false"/>
+            <log id="_log25" message="${body}"/>
+            <unmarshal id="_unmarshal7">
+                <custom ref="jack-obp-overall-balance"/>
+            </unmarshal>
+            <to id="_to23" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setUserInfo"/>
             <!-- Set Token to the default token value (admin token) -->
-            <setProperty propertyName="ObpToken">
+            <setProperty id="_setProperty20" propertyName="ObpToken">
                 <simple>${exchangeProperty[obpDefaultToken]}</simple>
             </setProperty>
         </route>
-        
-        
         <route id="route-get-token" streamCache="true">
             <from id="from-get-token" uri="direct:getToken"/>
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
@@ -208,7 +202,7 @@
             <setHeader headerName="CamelHttpMethod" id="_setHeader6">
                 <constant>POST</constant>
             </setHeader>
-            <to id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?throwExceptionOnFailure=false"/>
+            <to id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false"/>
             <unmarshal id="_unmarshal1">
                 <custom ref="jack-token"/>
             </unmarshal>
@@ -331,6 +325,7 @@
             <setHeader headerName="CamelHttpMethod" id="_setHeader20">
                 <constant>POST</constant>
             </setHeader>
+            <log message="[Transfer INFO] USD ${exchangeProperty[amount]} From '${exchangeProperty[accountIdFrom]}' To '${exchangeProperty[accountIdTo]}'" loggingLevel="INFO"/>
             <log id="_log20" loggingLevel="TRACE" message="[Transfer Data]: ${body}"/>
             <log id="_log21" loggingLevel="TRACE" message="[Transfer URI]: /obp/v4.0.0/banks/${exchangeProperty[bankId]}/accounts/${exchangeProperty[accountIdFrom]}/owner/transaction-request-types/SANDBOX_TAN/transaction-requests"/>
             <log id="_log20" loggingLevel="TRACE" message="[Transfer Token]: ${in.header.Authorization}"/>
@@ -344,7 +339,7 @@
         </route>
         <route id="route-initial-transfer" streamCache="true">
             <from id="from-initial-transfer" uri="direct:setInitialBalance"/>
-            <setProperty id="_setProperty14" propertyName="ammount">
+            <setProperty id="_setProperty14" propertyName="amount">
                 <constant>1000</constant>
             </setProperty>
             <setProperty id="_setProperty15" propertyName="accountIdTo">
@@ -366,7 +361,7 @@
             <setBody id="_setBody3">
                 <simple/>
             </setBody>
-            <log id="_log24" message="Setting USD$${exchangeProperty[ammount]} to user '${exchangeProperty[obpUsername]}' at Bank Account ${exchangeProperty[accountIdTo]}"/>
+            <log id="_log24" message="Setting USD$${exchangeProperty[amount]} to user '${exchangeProperty[obpUsername]}' at Bank Account ${exchangeProperty[accountIdTo]}"/>
             <log id="_log18" message="ObpUser: ${exchangeProperty[obpUsername]}"/>
             <to id="_to20" uri="direct:doTransfer"/>
             <!-- Set Token to the default token value (admin token) -->
@@ -387,9 +382,67 @@
             </setHeader>
             <toD id="to-scale-up-rc" uri="kubernetes-replication-controllers://{{ocp.endpointurl}}?oauthToken={{ocp.logintoken}}&amp;namespace=blackjack-20191007&amp;operation=scaleReplicationController"/>
         </route>
-        <route id="route-76e1be90-6678-4568-9593-ce8782f84b75">
-            <from id="from-d80096be-dc9a-4938-8d93-ae711b733177" uri="direct:rest5"/>
-            <to id="to-7d613824-3ee3-47c3-a345-b3c2a3b3a2de" uri="direct:501"/>
+        <route id="route-payment">
+            <from id="from-payment" uri="direct:payment"/>
+            <log id="_log26" message="Making a new TX... "/>
+            <log id="_log27" message="TX: ... "/>
+            <setProperty id="_setProperty21" propertyName="bankId">
+                <simple>{{obp.bankDefaultName}}</simple>
+            </setProperty>
+            <setProperty id="_setProperty22" propertyName="amount">
+                <simple resultType="java.lang.Integer">${body.amount}</simple>
+            </setProperty>
+            <!-- SETS Actual user for the transaction origin/from account -->
+            <setProperty id="_setProperty23" propertyName="obpPassword">
+                <simple>{{obp.userDefaultPass}}</simple>
+            </setProperty>
+            <setProperty id="_setProperty24" propertyName="email">
+                <simple>${body.email}</simple>
+            </setProperty>
+            <choice id="_choice3">
+                <when id="_when4">
+                    <javaScript>exchange.getProperty('amount') > 0</javaScript>
+                    <log message="Payment USD$ ${exchangeProperty[amount]} from {{obp.homeUsername}} to ${exchangeProperty[email]} ..."/>
+                    <setProperty id="_setProperty25" propertyName="obpUsername">
+                        <simple>{{obp.homeUsername}}</simple>
+                    </setProperty>
+                    <setProperty id="_setProperty26" propertyName="accountIdFrom">
+                        <simple>{{obp.homeACID}}</simple>
+                    </setProperty>
+                    <setProperty id="_setProperty27" propertyName="accountIdTo">
+                        <simple>${body.acid}</simple>
+                    </setProperty>
+                </when>
+                <otherwise id="_otherwise2">
+                    <setProperty id="_setProperty28" propertyName="amount">
+                        <javaScript>exchange.getProperty('amount') * -1</javaScript>
+                    </setProperty>
+                    <log message="Payment USD$ ${exchangeProperty[amount]} from ${exchangeProperty[email]} to {{obp.homeUsername}} ..."/>
+                    <setProperty id="_setProperty29" propertyName="obpUsername">
+                        <simple>${body.email}</simple>
+                    </setProperty>
+                    <setProperty id="_setProperty30" propertyName="accountIdFrom">
+                        <simple>${body.acid}</simple>
+                    </setProperty>
+                    <setProperty id="_setProperty31" propertyName="accountIdTo">
+                        <simple>{{obp.homeACID}}</simple>
+                    </setProperty>
+                </otherwise>
+            </choice>
+            <to id="to-7d613824-3ee3-47c3-a345-b3c2a3b3a2de" uri="direct:doTransfer"/>
+            <setProperty id="_setProperty32" propertyName="obpUsername">
+                <simple>${exchangeProperty[email]}</simple>
+            </setProperty>
+            <setBody><constant/></setBody>
+            <to id="_to24" uri="direct:getToken"/>
+            <to id="_to24" uri="direct:getUserInfo"/>
+            <unmarshal id="_unmarshal8">
+                <custom ref="jack-obp-user"/>
+            </unmarshal>
+            <setProperty id="_setProperty33" propertyName="obpUser">
+                <simple>${body}</simple>
+            </setProperty>
+            <to id="_to25" uri="direct:getUserAccountBalance"/>
         </route>
         <route id="route-d279e40d-d770-4bf3-b9a1-aa4b2cdc1e63">
             <from id="from-42df915b-4c7a-4ffe-a49f-c7695f92d4d1" uri="direct:rest6"/>

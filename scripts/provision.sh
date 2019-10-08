@@ -98,7 +98,7 @@ function deploy() {
 
   #deploy web app
   echo "Updating Fuse 7 image streams..."
-  oc apply -f fis-image-streams.json -n openshift
+  oc apply -f $DIR/fis-image-streams.json -n openshift
   # oc apply -f https://raw.githubusercontent.com/jboss-fuse/application-templates/master/quickstarts/spring-boot-camel-template.json
   sleep 15
   echo "Fuse 7 image streams updated."

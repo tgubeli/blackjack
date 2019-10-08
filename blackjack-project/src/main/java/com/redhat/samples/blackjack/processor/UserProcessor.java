@@ -263,7 +263,7 @@ public class UserProcessor {
 			to.setAccountId((String)exchange.getProperty("accountIdTo"));
 			to.setBankId((String)exchange.getProperty("bankId"));
 			obpTransactionRequest.setTo(to);
-			value.setAmount((String)exchange.getProperty("ammount"));
+			value.setAmount(String.valueOf(exchange.getProperty("amount")));
 			value.setCurrency("USD"); // default value
 			obpTransactionRequest.setValue(value);
 			

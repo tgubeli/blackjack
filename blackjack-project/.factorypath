@@ -36,7 +36,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/boot/spring-boot-actuator/1.5.17.RELEASE/spring-boot-actuator-1.5.17.RELEASE.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-servlet-starter/2.21.0.fuse-740039-redhat-00001/camel-servlet-starter-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-servlet/2.21.0.fuse-740039-redhat-00001/camel-servlet-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-http-common/2.21.0.fuse-740039-redhat-00001/camel-http-common-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-jackson-starter/2.21.0.fuse-740039-redhat-00001/camel-jackson-starter-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-jackson/2.21.0.fuse-740039-redhat-00001/camel-jackson-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-core/2.21.0.fuse-740039-redhat-00001/camel-core-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
@@ -44,9 +43,12 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.8.11/jackson-module-jaxb-annotations-2.8.11.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sun/xml/bind/jaxb-core/2.3.0/jaxb-core-2.3.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sun/xml/bind/jaxb-impl/2.3.0/jaxb-impl-2.3.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-gson-starter/2.21.0.fuse-740039-redhat-00001/camel-gson-starter-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-gson/2.21.0.fuse-740039-redhat-00001/camel-gson-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-http4/2.21.0.fuse-740039-redhat-00001/camel-http4-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-http-common/2.21.0.fuse-740039-redhat-00001/camel-http-common-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpclient/4.5.6/httpclient-4.5.6.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpcore/4.4.10/httpcore-4.4.10.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/commons-codec/commons-codec/1.10/commons-codec-1.10.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-swagger-java-starter/2.21.0.fuse-740039-redhat-00001/camel-swagger-java-starter-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-swagger-java/2.21.0.fuse-740039-redhat-00001/camel-swagger-java-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/datatype/jackson-datatype-joda/2.8.11/jackson-datatype-joda-2.8.11.jar" enabled="true" runInBatchMode="false"/>
@@ -77,4 +79,17 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/tomcat/tomcat-jdbc/8.0.36.redhat-35/tomcat-jdbc-8.0.36.redhat-35.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/tomcat/tomcat-juli/8.0.36.redhat-35/tomcat-juli-8.0.36.redhat-35.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/mysql/mysql-connector-java/5.1.47/mysql-connector-java-5.1.47.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-kubernetes-starter/2.21.0.fuse-740039-redhat-00001/camel-kubernetes-starter-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-kubernetes/2.21.0.fuse-740039-redhat-00001/camel-kubernetes-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/fabric8/kubernetes-client/3.1.12.fuse-740022-redhat-00001/kubernetes-client-3.1.12.fuse-740022-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/fabric8/kubernetes-model/2.0.10.fuse-740010-redhat-00001/kubernetes-model-2.0.10.fuse-740010-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/squareup/okhttp3/okhttp/3.9.1/okhttp-3.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/squareup/okio/okio/1.13.0/okio-1.13.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/squareup/okhttp3/logging-interceptor/3.9.1/logging-interceptor-3.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/fabric8/zjsonpatch/0.3.0/zjsonpatch-0.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/github/mifmif/generex/1.0.1/generex-1.0.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/dk/brics/automaton/automaton/1.11-8/automaton-1.11-8.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/fabric8/openshift-client/3.1.12.fuse-740022-redhat-00001/openshift-client-3.1.12.fuse-740022-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-script-starter/2.21.0.fuse-740039-redhat-00001/camel-script-starter-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-script/2.21.0.fuse-740039-redhat-00001/camel-script-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>
