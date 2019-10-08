@@ -1,19 +1,19 @@
 package com.redhat.samples.blackjack.processor;
 
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.camel.Exchange;
 
 import com.redhat.samples.blackjack.model.obp.ObpAccount;
+import com.redhat.samples.blackjack.model.obp.ObpAccountList;
 import com.redhat.samples.blackjack.model.obp.ObpAccountRouting;
 import com.redhat.samples.blackjack.model.obp.ObpBalance;
 import com.redhat.samples.blackjack.model.obp.ObpCreditLimit;
 import com.redhat.samples.blackjack.model.obp.ObpCreditRating;
 import com.redhat.samples.blackjack.model.obp.ObpCustomer;
 import com.redhat.samples.blackjack.model.obp.ObpFaceImage;
+import com.redhat.samples.blackjack.model.obp.ObpTransactionRequest;
+import com.redhat.samples.blackjack.model.obp.ObpTransactionTo;
 import com.redhat.samples.blackjack.model.obp.ObpUserCustomer;
 import com.redhat.samples.blackjack.model.obp.ObpUserData;
 
@@ -194,8 +194,51 @@ public class UserProcessor {
 		}
 	}
 	
-	public void getMainAccount() {
-		
+	public void getMainAccount(Exchange exchange) throws Exception {
+		try{
+			
+			
+			ObpAccountList accountList = (ObpAccountList) exchange.getIn().getBody();
+			ObpAccount mainAccount = null;
+			
+	        if(accountList!=null && accountList.getLsAccounts().size()>0) {
+	        	
+	        	mainAccount = accountList.getLsAccounts().get(0);
+	        	
+	        }else {
+	        	throw new Exception("User without Accounts");
+	        }
+	        
+	        exchange.getOut().setBody(mainAccount);
+	        
+		}catch(Exception e){
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	
+	public void createTransfer(Exchange exchange) throws Exception {
+		try{
+			
+			
+			ObpTransactionRequest obpTransactionRequest = new ObpTransactionRequest();
+			ObpTransactionTo to = new ObpTransactionTo();
+			ObpBalance value = new ObpBalance();
+			
+			obpTransactionRequest.setDescription("DemoJam account Transaction");
+			to.setAccountId((String)exchange.getProperty("accountIdTo"));
+			to.setBankId((String)exchange.getProperty("bankId"));
+			obpTransactionRequest.setTo(to);
+			value.setAmount((String)exchange.getProperty("ammount"));
+			value.setCurrency("USD"); // default value
+			obpTransactionRequest.setValue(value);
+			
+	        exchange.getOut().setBody(obpTransactionRequest);
+	        
+		}catch(Exception e){
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 }
