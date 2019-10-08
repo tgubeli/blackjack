@@ -4,6 +4,9 @@ import java.util.Date;
 
 import org.apache.camel.Exchange;
 
+import com.redhat.samples.blackjack.model.Account;
+import com.redhat.samples.blackjack.model.Balance;
+import com.redhat.samples.blackjack.model.User;
 import com.redhat.samples.blackjack.model.obp.ObpAccount;
 import com.redhat.samples.blackjack.model.obp.ObpAccountList;
 import com.redhat.samples.blackjack.model.obp.ObpAccountRouting;
@@ -12,14 +15,45 @@ import com.redhat.samples.blackjack.model.obp.ObpCreditLimit;
 import com.redhat.samples.blackjack.model.obp.ObpCreditRating;
 import com.redhat.samples.blackjack.model.obp.ObpCustomer;
 import com.redhat.samples.blackjack.model.obp.ObpFaceImage;
+import com.redhat.samples.blackjack.model.obp.ObpOverallBalance;
 import com.redhat.samples.blackjack.model.obp.ObpTransactionRequest;
 import com.redhat.samples.blackjack.model.obp.ObpTransactionTo;
+import com.redhat.samples.blackjack.model.obp.ObpUser;
 import com.redhat.samples.blackjack.model.obp.ObpUserCustomer;
 import com.redhat.samples.blackjack.model.obp.ObpUserData;
 
 public class UserProcessor {
 	
 	private static String BRANCH_ID = "9cf8-1234";
+	
+	public void setUserInfo(Exchange exchange) throws Exception {
+		try{
+			
+			ObpOverallBalance obpOverallBalance = exchange.getIn().getBody(ObpOverallBalance.class);
+			ObpUser obpUser = (ObpUser) exchange.getProperty("obpUser");
+	    	
+	        User user = new User();
+	        user.setEmail(obpUser.getEmail());
+	        user.setUid(obpUser.getUserId());
+	        
+	        if(obpOverallBalance!=null && obpOverallBalance.getAccounts()!=null && obpOverallBalance.getAccounts().size()>0) {
+	        	ObpAccount obpAccount =  obpOverallBalance.getAccounts().get(0);
+	 	        Account account = new Account();
+	 	        account.setAcid(obpAccount.getId());
+	 	        Balance balance = new Balance(obpAccount.getBalance().getAmount(), obpAccount.getBalance().getCurrency());
+	 	        account.setBalance(balance);
+	 	        user.setAccount(account);
+	        }
+	       
+			
+			exchange.getOut().setBody(user);
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			throw e;
+		}
+	}
 	
 	public void setEmailProperty(Exchange exchange) throws Exception {
 		try{

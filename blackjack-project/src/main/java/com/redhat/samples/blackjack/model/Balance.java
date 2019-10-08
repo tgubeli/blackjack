@@ -8,19 +8,19 @@ public class Balance {
 //            "currency": "USD"
 //        }
 	
-	private Long amount;
+	private String amount;
 	private String currency;
 	
-	public Balance(Long amount, String currency) {
+	public Balance(String amount, String currency) {
 		super();
 		this.amount = amount;
 		this.currency = currency;
 	}
 	
-	public Long getAmount() {
+	public String getAmount() {
 		return amount;
 	}
-	public void setAmount(Long amount) {
+	public void setAmount(String amount) {
 		this.amount = amount;
 	}
 	public String getCurrency() {
