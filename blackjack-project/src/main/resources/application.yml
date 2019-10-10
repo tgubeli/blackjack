@@ -55,7 +55,7 @@ postgres:
     database: obpuser
     username: obpuser
     password: obppassword
-    host: postgres
+    host: postgresql.demojam.svc.cluster.local
     port: 5432
 
 spring:
