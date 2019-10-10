@@ -17,8 +17,14 @@ public class RankingProcessor implements Processor {
 		List<Map<String, Object>> body = exchange.getIn().getBody(List.class);
 		for (Map<String, Object> item : body) {
 			UserRanking user = new UserRanking();
+			String balance = String.valueOf(item.get("accountbalance"));
 			user.setEmail(String.valueOf(item.get("holder")));
-			user.setBalance(String.valueOf(item.get("accountbalance")));
+			user.setBalance(
+				balance.substring(
+					0,(balance.length()-2)
+					)
+				.concat(".00")
+			);
 			users.add(user);
 		}
 
