@@ -15,17 +15,48 @@
  */
 package com.redhat.samples.blackjack;
 
+import javax.sql.DataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+
 
 @SpringBootApplication
-@ImportResource({"classpath:spring/camel-context.xml"})
+@ImportResource({ "classpath:spring/camel-context.xml" })
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+    }
+
+    @Bean(name = "dbStatus")
+    @ConfigurationProperties(prefix="spring.datasource.db-status")
+    public DataSource statusDataSource() {
+        return DataSourceBuilder.create().build();
+    }
+
+    @Primary
+    @Bean(name = "dbObp")
+    @ConfigurationProperties(prefix="spring.datasource.db-obp")
+    public DataSource obpDataSource() {
+        return DataSourceBuilder.create().build();
+    }
+    
+    @Bean
+    public JdbcTemplate statusJdbcTemplate(){
+        return new JdbcTemplate(statusDataSource());
+    }
+    
+    @Bean
+    public JdbcTemplate cobpJdbcTemplate(){
+        return new JdbcTemplate(obpDataSource());
     }
 
 }

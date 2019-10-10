@@ -4,6 +4,8 @@
     <bean class="com.redhat.samples.blackjack.processor.StatusProcessor" id="statusProcessor"/>
     <bean
         class="com.redhat.samples.blackjack.processor.StatusProcessorPost" id="statusProcessorPost"/>
+    <bean
+        class="com.redhat.samples.blackjack.processor.RankingProcessor" id="rankingProcessor"/>
     <bean class="com.redhat.samples.blackjack.processor.UserProcessor" id="userProcessor"/>
     <camelContext id="context-7d7f2df9-2d0a-476c-aedc-c96baafcc1e2" xmlns="http://camel.apache.org/schema/spring">
         <dataFormats>
@@ -14,6 +16,7 @@
             <json id="jack-obp-tx-response" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpTransactionResponse"/>
             <json id="jack-obp-overall-balance" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpOverallBalance"/>
             <json id="jack-payment" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.Payment"/>
+            <json id="jack-ranking" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.UserList"/>
             <json id="jack-json" include="NON_NULL" library="Jackson" prettyPrint="true"/>
         </dataFormats>
         <onException>
@@ -44,40 +47,40 @@
             </get>
         </rest>
         <rest apiDocs="true" bindingMode="auto" enableCORS="true"
-            id="rest-5c49d93f-50f8-40f4-8373-093ecb910f58" produces="application/json">
+            id="rest-api" produces="application/json">
             <!-- <get id="get-64c9c304-dd94-4a58-a594-e2eb154641a6" uri="/blackjack/api"> -->
             <!-- <description>Returns API documentation (Open API 3 format)</description> -->
             <!-- <to uri="direct:rest1"/> -->
             <!-- </get> -->
-            <get id="get-deeb5904-b0e9-40cf-bd49-fddaf0e4b290"
+            <get id="get-status"
                 produces="application/json" uri="/blackjack/status">
                 <to uri="direct:getStatus"/>
             </get>
             <post bindingMode="json"
-                id="post-f7733461-141f-49be-8e7c-c64bdb26e09a"
+                id="post-status"
                 type="com.redhat.samples.blackjack.model.Status" uri="/blackjack/status">
                 <to uri="direct:postStatus"/>
             </post>
-            <get id="get-8650bf08-5ede-41b5-9076-08f9f4068547" uri="/blackjack/user">
+            <get id="get-user" uri="/blackjack/user">
                 <description>Get user account info through his email. In case that the email doesn't exists, a new user account is created with a default balance amount.</description>
                 <to uri="direct:getUserLogin"/>
             </get>
-            <post id="post-2f382067-2ee2-4f88-b543-534010e64c56"
+            <post id="post-payment"
                 type="com.redhat.samples.blackjack.model.Payment" uri="/blackjack/user/payment">
                 <to uri="direct:payment"/>
             </post>
-            <get id="get-26fa5cde-b9d9-449f-800a-ad167df4e031" uri="/blackjack/user/ranking">
+            <get id="get-ranking" uri="/blackjack/user/ranking">
                 <description>Returns top 10 players of the game ordered by the amount won in the game.</description>
-                <to uri="direct:rest6"/>
+                <to uri="direct:ranking"/>
             </get>
         </rest>
         <route id="route-1d0e1de8-838d-41df-a0c0-6b74c766faab">
             <from id="from-2b5b918f-09b4-4663-9168-116aa1883f00" uri="direct:rest1"/>
             <to id="to-e77bb889-e5d5-4da3-a716-ab55cd8f9295" uri="direct:501"/>
         </route>
-        <route id="route-0a29916f-9ade-4441-8ca9-f92ecb776b8e" streamCache="true">
-            <from id="from-c5dde5b1-88ac-420a-bedc-28fa55c7f1c4" uri="direct:getStatus"/>
-            <to id="_to_sql_select" uri="sql:select * from status ORDER BY changed_at DESC LIMIT 1?dataSource=#dataSource"/>
+        <route id="route-status-get" streamCache="true">
+            <from id="from-status-get" uri="direct:getStatus"/>
+            <to id="_to_sql_select" uri="sql:select * from status ORDER BY changed_at DESC LIMIT 1?dataSource=#dbStatus"/>
             <process id="_process_sql_select" ref="statusProcessor"/>
             <log id="_log2" message="Status: ${body.started}"/>
         </route>
@@ -99,7 +102,7 @@
                     </setHeader>
                 </when>
             </choice>
-            <to id="_to_sql_update" uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dataSource"/>
+            <to id="_to_sql_update" uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dbStatus"/>
             <!-- <process id="_process_sql_update" ref="statusProcessor"/> -->
             <log id="_log3" message="Game state changed!"/>
         </route>
@@ -195,6 +198,11 @@
         </route>
         <route id="route-get-token" streamCache="true">
             <from id="from-get-token" uri="direct:getToken"/>
+
+            <setBody>
+                <simple/>
+            </setBody>
+
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
             <setHeader headerName="Authorization" id="_setHeader5">
                 <simple>DirectLogin username="${exchangeProperty[obpUsername]}",password="${exchangeProperty[obpPassword]}",consumer_key="{{obp.consumerkey}}"</simple>
@@ -385,7 +393,6 @@
         <route id="route-payment">
             <from id="from-payment" uri="direct:payment"/>
             <log id="_log26" message="Making a new TX... "/>
-            <log id="_log27" message="TX: ... "/>
             <setProperty id="_setProperty21" propertyName="bankId">
                 <simple>{{obp.bankDefaultName}}</simple>
             </setProperty>
@@ -429,7 +436,7 @@
                     </setProperty>
                 </otherwise>
             </choice>
-            <to id="to-7d613824-3ee3-47c3-a345-b3c2a3b3a2de" uri="direct:doTransfer"/>
+            <to uri="direct:doTransfer"/>
             <setProperty id="_setProperty32" propertyName="obpUsername">
                 <simple>${exchangeProperty[email]}</simple>
             </setProperty>
@@ -444,10 +451,16 @@
             </setProperty>
             <to id="_to25" uri="direct:getUserAccountBalance"/>
         </route>
-        <route id="route-d279e40d-d770-4bf3-b9a1-aa4b2cdc1e63">
-            <from id="from-42df915b-4c7a-4ffe-a49f-c7695f92d4d1" uri="direct:rest6"/>
-            <to id="to-112d9122-3c9d-46fb-9755-ec5d6df7fb2e" uri="direct:501"/>
+
+        <route id="route-ranking">
+            <from id="from-ranking" uri="direct:ranking"/>
+            <!-- GET TOP 10 USERS WITH MORE BALANCE AMOUNT (DESC) -->
+            <to id="_to_sql_select_ranking" uri="sql:select holder, accountbalance FROM mappedbankaccount WHERE createdat > '2019-10-09 00:00:00' ORDER BY accountbalance DESC limit 10?dataSource=#dbObp"/>
+            <process id="_process_sql_ranking" ref="rankingProcessor"/>
+            <log message="Top Ten: ${body}"/>
+
         </route>
+
         <route id="route-for-unimplemented-operations">
             <from id="from-for-unimplemented-operations-route" uri="direct:501"/>
             <log id="log-for-unimplemented-operations-route" message="API operation not yet implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}"/>
@@ -458,5 +471,6 @@
                 <simple>API operation not implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}</simple>
             </setBody>
         </route>
+        
     </camelContext>
 </beans>

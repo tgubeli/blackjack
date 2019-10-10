@@ -79,6 +79,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/tomcat/tomcat-jdbc/8.0.36.redhat-35/tomcat-jdbc-8.0.36.redhat-35.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/tomcat/tomcat-juli/8.0.36.redhat-35/tomcat-juli-8.0.36.redhat-35.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/mysql/mysql-connector-java/5.1.47/mysql-connector-java-5.1.47.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/postgresql/postgresql/42.2.2.redhat-2/postgresql-42.2.2.redhat-2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-kubernetes-starter/2.21.0.fuse-740039-redhat-00001/camel-kubernetes-starter-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/camel/camel-kubernetes/2.21.0.fuse-740039-redhat-00001/camel-kubernetes-2.21.0.fuse-740039-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/fabric8/kubernetes-client/3.1.12.fuse-740022-redhat-00001/kubernetes-client-3.1.12.fuse-740022-redhat-00001.jar" enabled="true" runInBatchMode="false"/>
