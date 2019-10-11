@@ -113,6 +113,9 @@
                 <simple>{{obp.userpassword}}</simple>
             </setProperty>
             <to id="_to1" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setEmailProperty"/>
+            <setBody >
+                <simple/>
+            </setBody>
             <to id="_to2" uri="direct:getToken"/>
             <setProperty id="_setProperty10" propertyName="obpDefaultToken">
                 <simple>${exchangeProperty[ObpToken]}</simple>
@@ -155,7 +158,7 @@
                 <simple>DirectLogin token="${exchangeProperty[obpDefaultToken]}"</simple>
             </setHeader>
             <setBody id="_setBody1">
-                <constant/>
+                <simple/>
             </setBody>
             <log id="_log6" message="Getting user info for '${exchangeProperty[email]}' ..."/>
             <toD id="_toD1" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/users/username/${exchangeProperty[email]}?throwExceptionOnFailure=false"/>
@@ -196,8 +199,8 @@
         </route>
         <route id="route-get-token" streamCache="true">
             <from id="from-get-token" uri="direct:getToken"/>
-            <setBody id="_setBody6">
-                <constant/>
+            <setBody >
+                <simple/>
             </setBody>
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
             <setHeader headerName="Authorization" id="_setHeader5">
@@ -426,7 +429,7 @@
                 <simple>${exchangeProperty[email]}</simple>
             </setProperty>
             <setBody id="_setBody7">
-                <constant/>
+                <simple/>
             </setBody>
             <to id="_to24" uri="direct:getToken"/>
             <to id="_to24" uri="direct:getUserInfo"/>
