@@ -112,7 +112,7 @@
                 <simple>{{obp.username}}</simple>
             </setProperty>
             <setProperty id="_setProperty6" propertyName="obpPassword">
-                <simple>{{obp.userDefaultPass}}</simple>
+                <simple>{{obp.userpassword}}</simple>
             </setProperty>
             <to id="_to1" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setEmailProperty"/>
             <to id="_to2" uri="direct:getToken"/>
@@ -154,9 +154,9 @@
                 <constant>GET</constant>
             </setHeader>
             <setHeader headerName="Authorization" id="_setHeader4">
-                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+                <simple>DirectLogin token="${exchangeProperty[obpDefaultToken]}"</simple>
             </setHeader>
-            <setBody id="_setBody1">
+            <setBody >
                 <constant/>
             </setBody>
             <log id="_log6" message="Getting user info for '${exchangeProperty[email]}' ..."/>
@@ -200,7 +200,7 @@
             <from id="from-get-token" uri="direct:getToken"/>
 
             <setBody>
-                <simple/>
+                <constant/>
             </setBody>
 
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
