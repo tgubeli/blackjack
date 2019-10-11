@@ -29,13 +29,6 @@ obp:
   homeACID: 8e9d7fef-c7d8-4cd1-8912-dd89bfd30b38-1570563558019
   balance:
     amount: 1000
-  
-#OCP values
-ocp:
-  endpointurl: https://master.scldemo-4599.open.redhat.com
-  logintoken: 5EnurTglp7LkE3XZ4_0VnypR8g0PWubsRR3MwXY74eA
-  bjnamespace: blackjack-20191007
-
     
 mysql:
   service:
