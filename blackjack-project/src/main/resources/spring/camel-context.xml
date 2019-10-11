@@ -207,8 +207,8 @@
                 <constant>POST</constant>
             </setHeader>
             <log message="DirectLogin username='${exchangeProperty[obpUsername]}',password='${exchangeProperty[obpPassword]}',consumer_key='{{obp.consumerkey}}'"/>
-            <to id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false"/>
-            <log message="${body}"/>
+            <toD id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false"/>
+            <log message="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false. Response: ${body}"/>
             <unmarshal id="_unmarshal1">
                 <custom ref="jack-token"/>
             </unmarshal>
