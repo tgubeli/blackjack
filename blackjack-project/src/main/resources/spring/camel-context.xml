@@ -52,12 +52,10 @@
             <!-- <description>Returns API documentation (Open API 3 format)</description> -->
             <!-- <to uri="direct:rest1"/> -->
             <!-- </get> -->
-            <get id="get-status"
-                produces="application/json" uri="/blackjack/status">
+            <get id="get-status" produces="application/json" uri="/blackjack/status">
                 <to uri="direct:getStatus"/>
             </get>
-            <post bindingMode="json"
-                id="post-status"
+            <post bindingMode="json" id="post-status"
                 type="com.redhat.samples.blackjack.model.Status" uri="/blackjack/status">
                 <to uri="direct:postStatus"/>
             </post>
@@ -156,7 +154,7 @@
             <setHeader headerName="Authorization" id="_setHeader4">
                 <simple>DirectLogin token="${exchangeProperty[obpDefaultToken]}"</simple>
             </setHeader>
-            <setBody >
+            <setBody id="_setBody1">
                 <constant/>
             </setBody>
             <log id="_log6" message="Getting user info for '${exchangeProperty[email]}' ..."/>
@@ -198,11 +196,9 @@
         </route>
         <route id="route-get-token" streamCache="true">
             <from id="from-get-token" uri="direct:getToken"/>
-
-            <setBody>
+            <setBody id="_setBody6">
                 <constant/>
             </setBody>
-
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
             <setHeader headerName="Authorization" id="_setHeader5">
                 <simple>DirectLogin username="${exchangeProperty[obpUsername]}",password="${exchangeProperty[obpPassword]}",consumer_key="{{obp.consumerkey}}"</simple>
@@ -333,7 +329,7 @@
             <setHeader headerName="CamelHttpMethod" id="_setHeader20">
                 <constant>POST</constant>
             </setHeader>
-            <log message="[Transfer INFO] USD ${exchangeProperty[amount]} From '${exchangeProperty[accountIdFrom]}' To '${exchangeProperty[accountIdTo]}'" loggingLevel="INFO"/>
+            <log id="_log27" loggingLevel="INFO" message="[Transfer INFO] USD ${exchangeProperty[amount]} From '${exchangeProperty[accountIdFrom]}' To '${exchangeProperty[accountIdTo]}'"/>
             <log id="_log20" loggingLevel="TRACE" message="[Transfer Data]: ${body}"/>
             <log id="_log21" loggingLevel="TRACE" message="[Transfer URI]: /obp/v4.0.0/banks/${exchangeProperty[bankId]}/accounts/${exchangeProperty[accountIdFrom]}/owner/transaction-request-types/SANDBOX_TAN/transaction-requests"/>
             <log id="_log20" loggingLevel="TRACE" message="[Transfer Token]: ${in.header.Authorization}"/>
@@ -377,7 +373,6 @@
                 <simple>${exchangeProperty[obpDefaultToken]}</simple>
             </setProperty>
         </route>
-        
         <route id="route-payment">
             <from id="from-payment" uri="direct:payment"/>
             <log id="_log26" message="Making a new TX... "/>
@@ -396,8 +391,8 @@
             </setProperty>
             <choice id="_choice3">
                 <when id="_when4">
-                    <javaScript>exchange.getProperty('amount') > 0</javaScript>
-                    <log message="Payment USD$ ${exchangeProperty[amount]} from {{obp.homeUsername}} to ${exchangeProperty[email]} ..."/>
+                    <javaScript>exchange.getProperty('amount') &gt; 0</javaScript>
+                    <log id="_log28" message="Payment USD$ ${exchangeProperty[amount]} from {{obp.homeUsername}} to ${exchangeProperty[email]} ..."/>
                     <setProperty id="_setProperty25" propertyName="obpUsername">
                         <simple>{{obp.homeUsername}}</simple>
                     </setProperty>
@@ -412,7 +407,7 @@
                     <setProperty id="_setProperty28" propertyName="amount">
                         <javaScript>exchange.getProperty('amount') * -1</javaScript>
                     </setProperty>
-                    <log message="Payment USD$ ${exchangeProperty[amount]} from ${exchangeProperty[email]} to {{obp.homeUsername}} ..."/>
+                    <log id="_log29" message="Payment USD$ ${exchangeProperty[amount]} from ${exchangeProperty[email]} to {{obp.homeUsername}} ..."/>
                     <setProperty id="_setProperty29" propertyName="obpUsername">
                         <simple>${body.email}</simple>
                     </setProperty>
@@ -424,11 +419,13 @@
                     </setProperty>
                 </otherwise>
             </choice>
-            <to uri="direct:doTransfer"/>
+            <to id="_to26" uri="direct:doTransfer"/>
             <setProperty id="_setProperty32" propertyName="obpUsername">
                 <simple>${exchangeProperty[email]}</simple>
             </setProperty>
-            <setBody><constant/></setBody>
+            <setBody id="_setBody7">
+                <constant/>
+            </setBody>
             <to id="_to24" uri="direct:getToken"/>
             <to id="_to24" uri="direct:getUserInfo"/>
             <unmarshal id="_unmarshal8">
@@ -439,17 +436,14 @@
             </setProperty>
             <to id="_to25" uri="direct:getUserAccountBalance"/>
         </route>
-
         <route id="route-ranking">
             <from id="from-ranking" uri="direct:ranking"/>
             <!-- GET TOP 10 USERS WITH MORE BALANCE AMOUNT (DESC) -->
-            <log message="Getting today Top 10 User Balances ('${date:now:yyyy-MM-dd} 00:00:00') ..."/>
+            <log id="_log30" message="Getting today Top 10 User Balances ('${date:now:yyyy-MM-dd} 00:00:00') ..."/>
             <toD id="_to_sql_select_ranking" uri="sql:select holder, accountbalance FROM mappedbankaccount WHERE createdat > '${date:now:yyyy-MM-dd} 00:00:00' ORDER BY accountbalance DESC limit 10?dataSource=#dbObp"/>
             <process id="_process_sql_ranking" ref="rankingProcessor"/>
-            <log message="Top Ten: ${body}"/>
-
+            <log id="_log31" message="Top Ten: ${body}"/>
         </route>
-
         <route id="route-for-unimplemented-operations">
             <from id="from-for-unimplemented-operations-route" uri="direct:501"/>
             <log id="log-for-unimplemented-operations-route" message="API operation not yet implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}"/>
@@ -460,6 +454,5 @@
                 <simple>API operation not implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}</simple>
             </setBody>
         </route>
-        
     </camelContext>
 </beans>
