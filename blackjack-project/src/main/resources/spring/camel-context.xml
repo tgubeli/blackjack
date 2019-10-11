@@ -455,7 +455,8 @@
         <route id="route-ranking">
             <from id="from-ranking" uri="direct:ranking"/>
             <!-- GET TOP 10 USERS WITH MORE BALANCE AMOUNT (DESC) -->
-            <to id="_to_sql_select_ranking" uri="sql:select holder, accountbalance FROM mappedbankaccount WHERE createdat > '2019-10-09 00:00:00' ORDER BY accountbalance DESC limit 10?dataSource=#dbObp"/>
+            <log message="Date Now: '${date:now:yyyy-MM-dd} 00:00:00'"/>
+            <toD id="_to_sql_select_ranking" uri="sql:select holder, accountbalance FROM mappedbankaccount WHERE createdat > '${date:now:yyyy-MM-dd} 00:00:00' ORDER BY accountbalance DESC limit 10?dataSource=#dbObp"/>
             <process id="_process_sql_ranking" ref="rankingProcessor"/>
             <log message="Top Ten: ${body}"/>
 
