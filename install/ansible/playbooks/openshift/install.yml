@@ -1,0 +1,5 @@
+---
+- name: "Install Open  Banking at Scale Demo"
+  hosts: demo
+  roles:
+    - demo

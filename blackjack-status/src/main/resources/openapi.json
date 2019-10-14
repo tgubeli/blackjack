@@ -1,0 +1,82 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1.0.0",
+    "title" : "RedHatBlackJack"
+  },
+  "paths" : {
+    "/blackjack/api" : {
+      "get" : {
+        "summary" : "Returns API documentation",
+        "description" : "Returns API documentation (Open API 3 format)",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns API documentation (Open API 3.0.2 format)"
+          }
+        }
+      }
+    },
+    "/blackjack/status" : {
+      "get" : {
+        "summary" : "Get the state of the game server.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns the Game Server's status. Could be { \"started\": \"true\" } or { \"started\": \"false\" }."
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Starts or Stops the Game Server",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns the state of the operation. { \"started\": \"true\" } or { \"started\": \"false\" }"
+          }
+        }
+      }
+    },
+    "/blackjack/user" : {
+      "get" : {
+        "summary" : "Get user account info",
+        "description" : "Get user account info through his email. In case that the email doesn not exists, a new user account is created with a default balance amount.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns User's Account info."
+          }
+        }
+      },
+      "parameters" : [ {
+        "name" : "email",
+        "in" : "query",
+        "description" : "User Email",
+        "required" : true
+      } ]
+    },
+    "/blackjack/user/payment" : {
+      "post" : {
+        "summary" : "Make a payment (payment or discount)",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns user account details weith the actual balance account updated."
+          }
+        }
+      }
+    },
+    "/blackjack/user/ranking" : {
+      "get" : {
+        "summary" : "Returns a list of the top 10 accounts playing the game",
+        "description" : "Returns top 10 players of the game ordered by the amount won in the game.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns top 10 players of the game ordered by the amount won in the game."
+          }
+        }
+      }
+    }
+  }
+}

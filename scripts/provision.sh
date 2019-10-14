@@ -103,8 +103,8 @@ function deploy() {
   sleep 15
   echo "Fuse 7 image streams updated."
   echo "Deploying Blackjack API..."
-  oc new-app fuse7-java-openshift:1.4$GIT_API_URL#$GIT_REF --context-dir=blackjack-project name=blackjack-api
-  # oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-project name=blackjack-api
+  oc new-app fuse7-java-openshift:1.4$GIT_API_URL#$GIT_REF --context-dir=blackjack-project --name=blackjack-api
+  # oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-project --name=blackjack-api
   # oc new-app --template=blackjack-20190923/s2i-fuse74-spring-boot-camel --param=APP_NAME=blackjack-api --param=GIT_REPO=https://github.com/tgubeli/blackjack.git --param=GIT_REF=master --param=MODULE_DIR=blackjack-project
 
 }

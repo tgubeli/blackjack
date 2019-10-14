@@ -1,0 +1,2 @@
+dependencies:
+  - { role: project, when: configure_only == 'false',  project: '{{ blackjack_project }}', display_name: "Black Jack Game" }

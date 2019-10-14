@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<redhatblackjack>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.redhat.samples.blackjack.Application",
+            "projectName": "redhatblackjack",
+            "args": ""
+        }
+    ]
+}

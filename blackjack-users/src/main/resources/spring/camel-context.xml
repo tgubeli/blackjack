@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean class="com.redhat.samples.blackjack.processor.StatusProcessor" id="statusProcessor"/>
+    <bean
+        class="com.redhat.samples.blackjack.processor.StatusProcessorPost" id="statusProcessorPost"/>
+    <bean
+        class="com.redhat.samples.blackjack.processor.RankingProcessor" id="rankingProcessor"/>
+    <bean class="com.redhat.samples.blackjack.processor.UserProcessor" id="userProcessor"/>
+    <camelContext id="context-7d7f2df9-2d0a-476c-aedc-c96baafcc1e2" xmlns="http://camel.apache.org/schema/spring">
+        <dataFormats>
+            <json id="jack-token" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.AuthToken"/>
+            <json id="jack-obp-user" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpUser"/>
+            <json id="jack-obp-customer" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpCustomer"/>
+            <json id="jack-obp-account" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpAccount"/>
+            <json id="jack-obp-tx-response" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpTransactionResponse"/>
+            <json id="jack-obp-overall-balance" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.obp.ObpOverallBalance"/>
+            <json id="jack-payment" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.Payment"/>
+            <json id="jack-ranking" library="Jackson" unmarshalTypeName="com.redhat.samples.blackjack.model.UserList"/>
+            <json id="jack-json" include="NON_NULL" library="Jackson" prettyPrint="true"/>
+        </dataFormats>
+        <onException>
+            <exception>java.lang.Exception</exception>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+                <constant>500</constant>
+            </setHeader>
+            <setBody>
+                <simple>${exception.message}</simple>
+            </setBody>
+        </onException>
+        <restConfiguration apiContextPath="/openapi.json" component="servlet"/>
+        
+        <rest apiDocs="true" bindingMode="auto" enableCORS="true"
+            id="rest-api-users" produces="application/json">
+            
+           
+            <get id="get-user" uri="/blackjack/user">
+                <description>Get user account info through his email. In case that the email doesn't exists, a new user account is created with a default balance amount.</description>
+                <to uri="direct:getUserLogin"/>
+            </get>
+            
+        </rest>
+        
+        <route id="route-getUserLogin" streamCache="true">
+            <from id="from-getUserLogin" uri="direct:getUserLogin"/>
+            <setProperty id="_setProperty5" propertyName="obpUsername">
+                <simple>{{obp.username}}</simple>
+            </setProperty>
+            <setProperty id="_setProperty6" propertyName="obpPassword">
+                <simple>{{obp.userpassword}}</simple>
+            </setProperty>
+            <to id="_to1" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setEmailProperty"/>
+            <setBody >
+                <simple/>
+            </setBody>
+            <to id="_to2" uri="direct:getToken"/>
+            <setProperty id="_setProperty10" propertyName="obpDefaultToken">
+                <simple>${exchangeProperty[ObpToken]}</simple>
+            </setProperty>
+            <to id="_to14" uri="direct:getUserInfo"/>
+            <choice id="_choice2">
+                <when id="_when3">
+                    <!-- USER NOT FOUND -->
+                    <simple>${bodyAs(String)} contains 'OBP-20027'</simple>
+                    <!-- CREATE USER LOGIC HERE (CREATE USER, CUSTOMER, LINK CUSTOMER AND USER, ACCOUNT, THEN GET USER) -->
+                    <log id="_log9" message="User not found! Creating new User account for ${exchangeProperty[email]} ..."/>
+                    <to id="_to4" uri="direct:createUser"/>
+                    <to id="_to5" uri="direct:createCustomer"/>
+                    <to id="_to3" uri="direct:createUserCustomer"/>
+                    <to id="_to11" uri="direct:createAccount"/>
+                    <!-- add 1000 dollars to the new account balance -->
+                    <to id="_to12" uri="direct:setInitialBalance"/>
+                    <!--                     <to uri="direct:scaleUpPod"/> -->
+                    <to id="_to17" uri="direct:getUserInfo"/>
+                    <log id="_log4" message="User Created: ${body}"/>
+                </when>
+                <otherwise id="_otherwise1">
+                    <log id="_log5" message="User Exists: ${body}"/>
+                </otherwise>
+            </choice>
+            <unmarshal id="_unmarshal2">
+                <custom ref="jack-obp-user"/>
+            </unmarshal>
+            <setProperty id="_setProperty17" propertyName="obpUser">
+                <simple>${body}</simple>
+            </setProperty>
+            <to id="_to21" uri="direct:getUserAccountBalance"/>
+        </route>
+
+        <route id="route-getUserInfo" streamCache="true">
+            <from id="from-getUserInfo" uri="direct:getUserInfo"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader3">
+                <constant>GET</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader4">
+                <simple>DirectLogin token="${exchangeProperty[obpDefaultToken]}"</simple>
+            </setHeader>
+            <setBody id="_setBody1">
+                <simple/>
+            </setBody>
+            <log id="_log6" message="Getting user info for '${exchangeProperty[email]}' ..."/>
+            <toD id="_toD1" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/users/username/${exchangeProperty[email]}?throwExceptionOnFailure=false"/>
+            <log id="_log7" message="User info response: ${bodyAs(String)}"/>
+        </route>
+
+        <route id="route-get-user-account" streamCache="true">
+            <from id="from-get-user-account-balance" uri="direct:getUserAccountBalance"/>
+            <!-- SETS Actual user for the transaction origin/from account -->
+            <setProperty id="_setProperty18" propertyName="obpUsername">
+                <simple>${exchangeProperty[email]}</simple>
+            </setProperty>
+            <setProperty id="_setProperty19" propertyName="obpPassword">
+                <simple>{{obp.userDefaultPass}}</simple>
+            </setProperty>
+            <setBody id="_setBody4">
+                <simple/>
+            </setBody>
+            <to id="_to22" uri="direct:getToken"/>
+            <setHeader headerName="Authorization" id="_setHeader23">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader24">
+                <constant>GET</constant>
+            </setHeader>
+            <setBody id="_setBody5">
+                <simple/>
+            </setBody>
+            <toD id="_toD4" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/{{obp.bankDefaultName}}/balances?throwExceptionOnFailure=false"/>
+            <log id="_log25" message="${body}"/>
+            <unmarshal id="_unmarshal7">
+                <custom ref="jack-obp-overall-balance"/>
+            </unmarshal>
+            <to id="_to23" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setUserInfo"/>
+            <!-- Set Token to the default token value (admin token) -->
+            <setProperty id="_setProperty20" propertyName="ObpToken">
+                <simple>${exchangeProperty[obpDefaultToken]}</simple>
+            </setProperty>
+        </route>
+
+        <route id="route-get-token" streamCache="true">
+            <from id="from-get-token" uri="direct:getToken"/>
+            <setBody >
+                <simple/>
+            </setBody>
+            <log id="_log8" message="Get OBP Token (Direct Login)..."/>
+            <setHeader headerName="Authorization" id="_setHeader5">
+                <simple>DirectLogin username="${exchangeProperty[obpUsername]}",password="${exchangeProperty[obpPassword]}",consumer_key="{{obp.consumerkey}}"</simple>
+            </setHeader>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader6">
+                <constant>POST</constant>
+            </setHeader>
+            <log message="${headers.Authorization}"/>
+            <toD id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?throwExceptionOnFailure=true"/>
+            <log message="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false. Response: ${body}"/>
+            <unmarshal id="_unmarshal1">
+                <custom ref="jack-token"/>
+            </unmarshal>
+            <log id="_log12" message="Token key: ${body.token}"/>
+            <setProperty id="_setProperty1" propertyName="ObpToken">
+                <simple>${body.token}</simple>
+            </setProperty>
+        </route>
+
+        <route id="route-create-user" streamCache="true">
+            <from id="from-create-user" uri="direct:createUser"/>
+            <log id="_log13" message="Creating User '${exchangeProperty[email]}'..."/>
+            <log id="_log13" message="Token: '${exchangeProperty[ObpToken]}'..."/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader8">
+                <constant>GET</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader9">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader10">
+                <simple>application/json</simple>
+            </setHeader>
+            <setProperty id="_setProperty9" propertyName="userdefaultpassword">
+                <simple>{{obp.userDefaultPass}}</simple>
+            </setProperty>
+            <removeHeaders
+                excludePattern="Authorization|CamelHttpMethod|ObpToken|Content-Type"
+                id="_removeHeaders1" pattern="*"/>
+            <to id="_to6" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoUserOBP"/>
+            <marshal id="_marshal1" ref="jack-json"/>
+            <to id="_to7" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/users"/>
+            <unmarshal id="_unmarshal3">
+                <custom ref="jack-obp-user"/>
+            </unmarshal>
+            <setProperty id="_setProperty3" propertyName="userId">
+                <simple>${body.userId}</simple>
+            </setProperty>
+        </route>
+
+        <route id="route-create-customer" streamCache="true">
+            <from id="from-create-customer" uri="direct:createCustomer"/>
+            <log id="_log10" message="Creating Customer for User '${exchangeProperty[email]}'..."/>
+            <to id="_to8" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoOBPCustomer"/>
+            <marshal id="_marshal2" ref="jack-json"/>
+            <removeHeaders id="_removeHeaders2" pattern="*"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader11">
+                <constant>POST</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader12">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader13">
+                <simple>application/json</simple>
+            </setHeader>
+            <log id="_log11" message="DirectLogin token=${exchangeProperty[ObpToken]}"/>
+            <to id="_to9" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/{{obp.bankDefaultName}}/customers?throwExceptionOnFailure=false"/>
+            <unmarshal id="_unmarshal4">
+                <custom ref="jack-obp-customer"/>
+            </unmarshal>
+            <setProperty id="_setProperty2" propertyName="customerId">
+                <simple>${body.customerId}</simple>
+            </setProperty>
+        </route>
+
+        <route id="route-create-user-customer" streamCache="true">
+            <from id="from-create-user-customer" uri="direct:createUserCustomer"/>
+            <log id="_log14" message="Creating Link between User and Customer for Email '${exchangeProperty[email]}'..."/>
+            <to id="_to10" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoOBPUserCustomer"/>
+            <marshal id="_marshal3" ref="jack-json"/>
+            <removeHeaders id="_removeHeaders3" pattern="*"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader7">
+                <constant>POST</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader14">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader15">
+                <simple>application/json</simple>
+            </setHeader>
+            <to id="_to15" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/{{obp.bankDefaultName}}/user_customer_links?throwExceptionOnFailure=false"/>
+        </route>
+
+        <route id="route-create-account" streamCache="true">
+            <from id="from-create-account" uri="direct:createAccount"/>
+            <log id="_log15" message="Creating Account for User '${exchangeProperty[email]}'..."/>
+            <setProperty id="_setProperty4" propertyName="balanceInitAmount">
+                <simple>{{obp.balance.amount}}</simple>
+            </setProperty>
+            <to id="_to16" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createPojoOBPAccount"/>
+            <marshal id="_marshal4" ref="jack-json"/>
+            <removeHeaders id="_removeHeaders4" pattern="*"/>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader16">
+                <constant>PUT</constant>
+            </setHeader>
+            <setHeader headerName="Authorization" id="_setHeader17">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="Content-Type" id="_setHeader18">
+                <simple>application/json</simple>
+            </setHeader>
+            <log id="_log16" message="UID: ${exchangeProperty[userId]}"/>
+            <toD id="_toD2" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/{{obp.bankDefaultName}}/accounts/${exchangeProperty[labelId]}?throwExceptionOnFailure=false"/>
+            <log id="_log17" message="Body Account ${body}"/>
+            <unmarshal id="_unmarshal5">
+                <custom ref="jack-obp-account"/>
+            </unmarshal>
+            <setProperty id="_setProperty13" propertyName="accountIdCreated">
+                <simple>${exchangeProperty[labelId]}</simple>
+            </setProperty>
+        </route>
+
+        <route id="route-do-transfer" streamCache="true">
+            <from id="from-do-transfer" uri="direct:doTransfer"/>
+            <!-- Get a new token. A token associated with the User "From Account" -->
+            <log id="_log19" message="Making the transfer..."/>
+            <setBody id="_setBody2">
+                <simple/>
+            </setBody>
+            <to id="_to18" uri="direct:getToken"/>
+            <to id="_to19" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=createTransfer"/>
+            <marshal id="_marshal5" ref="jack-json"/>
+            <setHeader headerName="Authorization" id="_setHeader19">
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
+            </setHeader>
+            <setHeader headerName="CamelHttpMethod" id="_setHeader20">
+                <constant>POST</constant>
+            </setHeader>
+            <log id="_log27" loggingLevel="INFO" message="[Transfer INFO] USD ${exchangeProperty[amount]} From '${exchangeProperty[accountIdFrom]}' To '${exchangeProperty[accountIdTo]}'"/>
+            <log id="_log20" loggingLevel="TRACE" message="[Transfer Data]: ${body}"/>
+            <log id="_log21" loggingLevel="TRACE" message="[Transfer URI]: /obp/v4.0.0/banks/${exchangeProperty[bankId]}/accounts/${exchangeProperty[accountIdFrom]}/owner/transaction-request-types/SANDBOX_TAN/transaction-requests"/>
+            <log id="_log20" loggingLevel="TRACE" message="[Transfer Token]: ${in.header.Authorization}"/>
+            <!-- Make TX between accounts -->
+            <toD id="_toD3" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/${exchangeProperty[bankId]}/accounts/${exchangeProperty[accountIdFrom]}/owner/transaction-request-types/SANDBOX_TAN/transaction-requests?throwExceptionOnFailure=false"/>
+            <log id="_log22" loggingLevel="TRACE" message="[Transfer Response]: ${body}"/>
+            <unmarshal id="_unmarshal6">
+                <custom ref="jack-obp-tx-response"/>
+            </unmarshal>
+            <log id="_log23" message="Transfer success!"/>
+        </route>
+
+        <route id="route-initial-transfer" streamCache="true">
+            <from id="from-initial-transfer" uri="direct:setInitialBalance"/>
+            <setProperty id="_setProperty14" propertyName="amount">
+                <constant>1000</constant>
+            </setProperty>
+            <setProperty id="_setProperty15" propertyName="accountIdTo">
+                <simple>${exchangeProperty[accountIdCreated]}</simple>
+            </setProperty>
+            <setProperty id="_setProperty11" propertyName="accountIdFrom">
+                <simple>${exchangeProperty[accountIdCreated]}</simple>
+            </setProperty>
+            <setProperty id="_setProperty12" propertyName="bankId">
+                <simple>{{obp.bankDefaultName}}</simple>
+            </setProperty>
+            <!-- SETS Actual user for the transaction origin/from account -->
+            <setProperty id="_setProperty7" propertyName="obpUsername">
+                <simple>${exchangeProperty[email]}</simple>
+            </setProperty>
+            <setProperty id="_setProperty8" propertyName="obpPassword">
+                <simple>{{obp.userDefaultPass}}</simple>
+            </setProperty>
+            <setBody id="_setBody3">
+                <simple/>
+            </setBody>
+            <log id="_log24" message="Setting USD$${exchangeProperty[amount]} to user '${exchangeProperty[obpUsername]}' at Bank Account ${exchangeProperty[accountIdTo]}"/>
+            <log id="_log18" message="ObpUser: ${exchangeProperty[obpUsername]}"/>
+            <to id="_to20" uri="direct:doTransfer"/>
+            <!-- Set Token to the default token value (admin token) -->
+            <setProperty id="_setProperty16" propertyName="ObpToken">
+                <simple>${exchangeProperty[obpDefaultToken]}</simple>
+            </setProperty>
+        </route>
+
+        
+    </camelContext>
+</beans>

@@ -1,0 +1,50 @@
+---
+- name: Make sure we go back to default project
+  shell: "oc project default"
+
+- name: Check if Fuse 7.4 image streams are available
+  shell: "oc describe istag fuse7-java-openshift:1.4 -n openshift"
+  register: imagestream_exists
+  when: configure_only == 'false'
+  ignore_errors: true
+
+- name: Create image streams for Fuse 7.4
+  shell: "oc create -f https://raw.githubusercontent.com/tgubeli/blackjack/master/support/templates/fis-image-streams.json -n openshift"
+  when: configure_only == 'false' and imagestream_exists.failed
+
+- name: Create Blackjack Game Database
+  shell: "oc new-app openshift/mysql:5.7 --name='mysql' -e MYSQL_USER='blackjack' -e MYSQL_PASSWORD='r3dh4t1!' -e MYSQL_DATABASE=blackjack \
+   -e MYSQL_MAX_CONNECTIONS=512 -n {{ blackjack_project }}"
+  when: configure_only == 'false'
+
+- name: Wait until DB is ready
+    shell: "while [[ $(oc get pods -l app=mysql -o 'jsonpath={..status.conditions[?(@.type=='Ready')].status}') != "True" ]]; do echo "Waiting for Data Base to be ready..." && sleep 2; done"
+  
+- name: Wait until RH SSO API is available 
+  uri: 
+    url: https://secure-sso-{{sso_project}}.{{ocp_apps_domain}}
+    method: HEAD
+    follow_redirects: safe
+    validate_certs: no
+  register: wait_sso_result
+  until: wait_sso_result is succeeded
+  ignore_errors: yes
+  retries: 15
+  delay: 60
+  when: create_realms
+
+- name: Create Backend API service
+  shell: "oc new-app s2i-fuse70-spring-boot-camel -p GIT_REPO=https://github.com/hguerrero/3scale-api-workshop \
+  -p CONTEXT_DIR=/projects/location-service -p APP_NAME=location-service -p GIT_REF=master -n {{ backend_project }}"
+  when: configure_only == 'false'
+
+- name: Create Webpage application
+  shell: "oc new-app https://github.com/hguerrero/3scaleworkshop-wwwpage#secured --name www \
+  --build-env API_BACKEND_URL=https://location-sso-staging.amp.{{ ocp_apps_domain }}/locations \
+  --build-env SSO_URL=http://sso-rh-sso.{{ ocp_apps_domain }} --build-env SSO_REALM=threescale \
+  --build-env CLIENT_ID=www-secured -n {{ backend_project }}"
+  when: configure_only == 'false'
+
+- name: Create webapp route
+  shell: "oc expose svc/www -n {{ backend_project }}"
+  when: configure_only == 'false'

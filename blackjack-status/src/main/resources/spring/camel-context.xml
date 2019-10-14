@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean class="com.redhat.samples.blackjack.processor.StatusProcessor" id="statusProcessor"/>
+    <bean
+        class="com.redhat.samples.blackjack.processor.StatusProcessorPost" id="statusProcessorPost"/>
+    
+    <camelContext id="context-7d7f2df9-2d0a-476c-aedc-c96baafcc1e2" xmlns="http://camel.apache.org/schema/spring">
+        <dataFormats>
+            
+            <json id="jack-json" include="NON_NULL" library="Jackson" prettyPrint="true"/>
+        </dataFormats>
+        <onException>
+            <exception>java.lang.Exception</exception>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+                <constant>500</constant>
+            </setHeader>
+            <setBody>
+                <simple>${exception.message}</simple>
+            </setBody>
+        </onException>
+        <restConfiguration apiContextPath="/openapi.json" component="servlet"/>
+        
+        <rest apiDocs="true" bindingMode="auto" enableCORS="true"
+            id="rest-api-status" produces="application/json">
+            
+            <get id="get-status" produces="application/json" uri="/blackjack/status">
+                <to uri="direct:getStatus"/>
+            </get>
+            <post bindingMode="json" id="post-status"
+                type="com.redhat.samples.blackjack.model.Status" uri="/blackjack/status">
+                <to uri="direct:postStatus"/>
+            </post>
+            
+        </rest>
+       
+        <route id="route-status-get" streamCache="true">
+            <from id="from-status-get" uri="direct:getStatus"/>
+            <to id="_to_sql_select" uri="sql:select * from status ORDER BY changed_at DESC LIMIT 1?dataSource=#dbStatus"/>
+            <process id="_process_sql_select" ref="statusProcessor"/>
+            <log id="_log2" message="Status: ${body.started}"/>
+        </route>
+        <route id="route-status-post" streamCache="true">
+            <from id="from-status-post" uri="direct:postStatus"/>
+            <to id="_bean_status_setDates" uri="class:com.redhat.samples.blackjack.processor.StatusProcessorPost?method=setDates"/>
+            <log id="_log1" message="Changing game boolean state to: ${body.started}"/>
+            <choice id="_choice1">
+                <when id="_when1">
+                    <simple>${body.started} == 'true'</simple>
+                    <setHeader headerName="started" id="_setHeader1">
+                        <constant>1</constant>
+                    </setHeader>
+                </when>
+                <when id="_when2">
+                    <simple>${body.started} == 'false'</simple>
+                    <setHeader headerName="started" id="_setHeader2">
+                        <constant>0</constant>
+                    </setHeader>
+                </when>
+            </choice>
+            <to id="_to_sql_update" uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dbStatus"/>
+            <!-- <process id="_process_sql_update" ref="statusProcessor"/> -->
+            <log id="_log3" message="Game state changed!"/>
+        </route>
+        
+    </camelContext>
+</beans>
