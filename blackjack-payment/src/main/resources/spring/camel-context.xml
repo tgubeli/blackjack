@@ -62,7 +62,7 @@
                 <constant>GET</constant>
             </setHeader>
             <setHeader headerName="Authorization" id="_setHeader4">
-                <simple>DirectLogin token="${exchangeProperty[obpDefaultToken]}"</simple>
+                <simple>DirectLogin token="${exchangeProperty[ObpToken]}"</simple>
             </setHeader>
             <setBody id="_setBody1">
                 <simple/>
