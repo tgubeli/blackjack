@@ -74,6 +74,8 @@
         
         <route id="route-get-user-account" streamCache="true">
             <from id="from-get-user-account-balance" uri="direct:getUserAccountBalance"/>
+
+            <log message="Getting user account balance..."/>
             <!-- SETS Actual user for the transaction origin/from account -->
             <setProperty id="_setProperty18" propertyName="obpUsername">
                 <simple>${exchangeProperty[email]}</simple>
@@ -100,10 +102,7 @@
                 <custom ref="jack-obp-overall-balance"/>
             </unmarshal>
             <to id="_to23" uri="class:com.redhat.samples.blackjack.processor.UserProcessor?method=setUserInfo"/>
-            <!-- Set Token to the default token value (admin token) -->
-            <setProperty id="_setProperty20" propertyName="ObpToken">
-                <simple>${exchangeProperty[obpDefaultToken]}</simple>
-            </setProperty>
+            
         </route>
         
         <route id="route-get-token" streamCache="true">
@@ -111,6 +110,7 @@
             <setBody >
                 <simple/>
             </setBody>
+            <removeHeaders pattern="*" />
             <log id="_log8" message="Get OBP Token (Direct Login)..."/>
             <setHeader headerName="Authorization" id="_setHeader5">
                 <simple>DirectLogin username="${exchangeProperty[obpUsername]}",password="${exchangeProperty[obpPassword]}",consumer_key="{{obp.consumerkey}}"</simple>
@@ -119,7 +119,7 @@
                 <constant>POST</constant>
             </setHeader>
             <log message="${headers.Authorization}"/>
-            <toD id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=true"/>
+            <toD id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false"/>
             <log message="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false. Response: ${body}"/>
             <unmarshal id="_unmarshal1">
                 <custom ref="jack-token"/>
@@ -130,11 +130,6 @@
             </setProperty>
         </route>
         
-        
-        
-
-        
-
         <route id="route-do-transfer" streamCache="true">
             <from id="from-do-transfer" uri="direct:doTransfer"/>
             <!-- Get a new token. A token associated with the User "From Account" -->
@@ -157,7 +152,7 @@
             <log id="_log20" loggingLevel="TRACE" message="[Transfer Token]: ${in.header.Authorization}"/>
             <!-- Make TX between accounts -->
             <toD id="_toD3" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/${exchangeProperty[bankId]}/accounts/${exchangeProperty[accountIdFrom]}/owner/transaction-request-types/SANDBOX_TAN/transaction-requests?throwExceptionOnFailure=false"/>
-            <log id="_log22" loggingLevel="TRACE" message="[Transfer Response]: ${body}"/>
+            <log id="_log22" loggingLevel="INFO" message="[Transfer Response]: ${body}"/>
             <unmarshal id="_unmarshal6">
                 <custom ref="jack-obp-tx-response"/>
             </unmarshal>
@@ -215,9 +210,15 @@
             
             <to id="_to26" uri="direct:doTransfer"/>
 
+            <log message="Geting token for : {{obp.username}} ..."/>
+
             <setProperty id="_setProperty32" propertyName="obpUsername">
-                <simple>${exchangeProperty[email]}</simple>
+                <simple>{{obp.username}}</simple>
             </setProperty>
+            <setProperty propertyName="obpPassword">
+                <simple>{{obp.userpassword}}</simple>
+            </setProperty>
+
             <setBody id="_setBody7">
                 <simple/>
             </setBody>
@@ -229,6 +230,7 @@
             <unmarshal id="_unmarshal8">
                 <custom ref="jack-obp-user"/>
             </unmarshal>
+
             <setProperty id="_setProperty33" propertyName="obpUser">
                 <simple>${body}</simple>
             </setProperty>

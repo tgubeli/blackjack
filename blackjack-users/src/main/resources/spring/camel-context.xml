@@ -106,7 +106,7 @@
             <log id="_log7" message="User info response: ${bodyAs(String)}"/>
         </route>
 
-        <route id="route-get-user-account" streamCache="true">
+        <route id="route-get-user-account-balance" streamCache="true">
             <from id="from-get-user-account-balance" uri="direct:getUserAccountBalance"/>
             <!-- SETS Actual user for the transaction origin/from account -->
             <setProperty id="_setProperty18" propertyName="obpUsername">
@@ -129,7 +129,7 @@
                 <simple/>
             </setBody>
             <toD id="_toD4" uri="http4://{{obp.endpointurl}}/obp/v4.0.0/banks/{{obp.bankDefaultName}}/balances?throwExceptionOnFailure=false"/>
-            <log id="_log25" message="${body}"/>
+            <log id="_log25" message="Balance: ${body}"/>
             <unmarshal id="_unmarshal7">
                 <custom ref="jack-obp-overall-balance"/>
             </unmarshal>

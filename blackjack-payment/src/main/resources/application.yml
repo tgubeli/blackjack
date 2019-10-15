@@ -25,8 +25,8 @@ obp:
   consumerkey: l4hnl0ivld1f55knjjwoxtrur2c2qvljlulsc2st
   endpointurl: obpapi-service.demojam.svc.cluster.local
   bankDefaultName: psd201-bank-x--uk
-  homeUsername: blackjack.casino@email.com
-  homeACID: 8e9d7fef-c7d8-4cd1-8912-dd89bfd30b38-1570563558019
+  homeUsername: blackjack.casino2@email.com
+  homeACID: f25567cf-e774-47a1-ad4b-ea8383e02f87-1571170552295
   balance:
     amount: 1000
     
