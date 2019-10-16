@@ -46,7 +46,9 @@ spring:
   # Spring JDBC configuration
   datasource:
     db-status:
-      url: jdbc:mysql://${${mysql.service.name}.service.host}:${mysql.service.port}/${mysql.service.database}?useSSL=false
+      url: jdbc:mysql://${${mysql.service.name}.service.host}:${mysql.service.port}/${mysql.service.database}?useSSL=false&autoReconnect=true
       username: ${mysql.service.username}
       password: ${mysql.service.password}
       driverClassName: com.mysql.jdbc.Driver
+      validationQuery: "SELECT 1"
+      testOnBorrow: "true"
