@@ -61,7 +61,8 @@
                     </setHeader>
                 </when>
             </choice>
-            <to id="_to_sql_update" uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dbStatus"/>
+            <!--to id="_to_sql_update" uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now WHERE changed_at BETWEEN :#status_date_init and :#status_date_end ?dataSource=#dbStatus"/-->
+            <to id="_to_sql_update" uri="sql:UPDATE status SET is_init = :#started, changed_at = :#status_date_now?dataSource=#dbStatus"/>
             <!-- <process id="_process_sql_update" ref="statusProcessor"/> -->
             <log id="_log3" message="Game state changed!"/>
         </route>
