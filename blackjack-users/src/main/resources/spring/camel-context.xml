@@ -153,7 +153,7 @@
                 <constant>POST</constant>
             </setHeader>
             <log message="${headers.Authorization}"/>
-            <toD id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?throwExceptionOnFailure=true"/>
+            <toD id="_to13" uri="http4://{{obp.endpointurl}}/my/logins/direct?throwExceptionOnFailure=false"/>
             <log message="http4://{{obp.endpointurl}}/my/logins/direct?bridgeEndpoint=true&amp;throwExceptionOnFailure=false. Response: ${body}"/>
             <unmarshal id="_unmarshal1">
                 <custom ref="jack-token"/>
