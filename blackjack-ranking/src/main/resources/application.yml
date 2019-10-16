@@ -29,18 +29,6 @@ obp:
   homeACID: 8e9d7fef-c7d8-4cd1-8912-dd89bfd30b38-1570563558019
   balance:
     amount: 1000
-    
-mysql:
-  service:
-    # The name of the service hosting the MySQL database server,
-    # can be customized using the 'MYSQL_SERVICE_NAME' env variable to use a different service
-    name:     mysql
-    # The database to use, can be customized using the 'MYSQL_SERVICE_DATABASE' env variable
-    database: blackjack
-    username: blackjack
-    password: r3dh4t1!
-    host: mysql
-    port: 3306
   
 postgres:
   service:
@@ -54,11 +42,6 @@ postgres:
 spring:
   # Spring JDBC configuration
   datasource:
-    db-status:
-      url: jdbc:mysql://${${mysql.service.name}.service.host}:${mysql.service.port}/${mysql.service.database}?useSSL=false
-      username: ${mysql.service.username}
-      password: ${mysql.service.password}
-      driverClassName: com.mysql.jdbc.Driver
     db-obp:
       url: jdbc:postgresql://${postgres.service.host}:${postgres.service.port}/${postgres.service.database}
       username: ${postgres.service.username}

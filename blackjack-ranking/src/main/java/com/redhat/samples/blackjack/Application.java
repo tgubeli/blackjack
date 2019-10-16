@@ -36,22 +36,11 @@ public class Application extends SpringBootServletInitializer {
         SpringApplication.run(Application.class, args);
     }
 
-    @Bean(name = "dbStatus")
-    @ConfigurationProperties(prefix="spring.datasource.db-status")
-    public DataSource statusDataSource() {
-        return DataSourceBuilder.create().build();
-    }
-
     @Primary
     @Bean(name = "dbObp")
     @ConfigurationProperties(prefix="spring.datasource.db-obp")
     public DataSource obpDataSource() {
         return DataSourceBuilder.create().build();
-    }
-    
-    @Bean
-    public JdbcTemplate statusJdbcTemplate(){
-        return new JdbcTemplate(statusDataSource());
     }
     
     @Bean
