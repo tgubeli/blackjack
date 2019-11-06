@@ -1,0 +1,167 @@
+kind: "Template"
+apiVersion: v1
+metadata:
+  name: "obp-api-example"
+objects:
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bootstrap-deployment
+        labels:
+          app: bootstrap
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: bootstrap
+        template:
+          metadata:
+            labels:
+              app: bootstrap
+          spec:
+            containers:
+            - name: bootstrap-container
+              image: chrisjsimpson/obp-bootstrap:latest
+              imagePullPolicy: Always
+              env:
+              - name: OBP_API_HOST
+                value: http://obpapi-service.test.svc
+              - name: OBP_PASSWORD
+                value: Treedom#112
+              - name: OBP_USERNAME
+                value: demo
+              - name: OBP_EMAIL
+                value: demo@example.com
+              - name: OBP_FIRSTNAME
+                value: fred
+              - name: OBP_LASTNAME
+                value: smith
+              - name: MOZ_HEADLESS
+                value: "1"
+    - kind: Secret
+      apiVersion: v1
+      metadata:
+          name: postgres-credentials
+      type: Opaque
+      data:
+          postgres_user: b2JwdXNlcg== #obpuser
+          postgres_password: b2JwcGFzc3dvcmQ= #obppassword
+          postgres_db_name: b2JwdXNlcg== #obpuser
+          postgres_data: L3Zhci9saWIvcG9zdGdyZXNxbC9kYXRhL3BnZGF0YQ== # /var/lib/postgresql/data/pgdata
+          jdbc_driver: b3JnLnBvc3RncmVzcWwuRHJpdmVy # org.postgresql.Driver
+          jdbc_url: amRiYzpwb3N0Z3Jlc3FsOi8vcG9zdGdyZXNxbDo1NDMyL29icHVzZXI/dXNlcj1vYnB1c2VyJnBhc3N3b3JkPW9icHBhc3N3b3Jk # jdbc:postgresql://postgresql:5432/obpuser?user=obpuser&password=obppassword
+    - kind: Service
+      apiVersion: v1
+      metadata:
+          name: obpapi-service
+      spec:
+          selector:
+              app: obpapi
+          ports:
+          - name: http
+            protocol: TCP
+            port: 80
+            targetPort: 8080
+          - name: postgres
+            protocol: TCP
+            port: 5432
+            targetPort: 5432
+          type: LoadBalancer
+    - apiVersion: v1
+      kind: Route
+      metadata:
+        name: obp-frontend
+      spec:
+        port:
+          targetPort: http
+        to:
+          kind: Service
+          name: obpapi-service
+    - kind: Deployment
+      apiVersion: apps/v1
+      metadata:
+         name: obp-deployment
+         labels:
+             app: obpapi
+      spec:
+          replicas: 1
+          selector:
+              matchLabels:
+                  app: obpapi
+          template:
+              metadata:
+                  labels:
+                      app: obpapi
+              spec:
+                  containers:
+                  - name: obpapi
+                    image: quay.io/fmeneses/obp-apikube:1.1.0 # docker build -t obpapi-kube .
+                    resources:
+                      limits:
+                        memory: "800Mi"
+                      requests:
+                        memory: "600Mi"
+                    env:
+                      - name: DB_DRIVER
+                        valueFrom:
+                          secretKeyRef:
+                           name: postgres-credentials
+                           key: jdbc_driver
+                      - name: DB_URL
+                        valueFrom:
+                          secretKeyRef:
+                           name: postgres-credentials
+                           key: jdbc_url
+                      - name: OBP_SUPER_ADMIN_USER_IDS
+                        value: 2962503a-c671-4708-a4c5-e1a62542ae0b
+
+                    ports:
+                    - containerPort: 8080
+                      name: http
+                    - containerPort: 5432
+                      name: postgres
+
+parameters:
+  - description: Maximum amount of memory the container can use.
+    displayName: Memory Limit
+    name: MEMORY_LIMIT
+    required: true
+    value: 512Mi
+  - description: The OpenShift Namespace where the ImageStream resides.
+    displayName: Namespace
+    name: NAMESPACE
+    value: openshift
+  - description: The name of the OpenShift Service exposed for the database.
+    displayName: Database Service Name
+    name: DATABASE_SERVICE_NAME
+    required: true
+    value: postgresql
+  - description: Username for PostgreSQL user that will be used for accessing the database.
+    displayName: PostgreSQL Connection Username
+    from: 'user[A-Z0-9]{3}'
+    generate: expression
+    name: POSTGRESQL_USER
+    required: true
+    value: obpuser
+  - description: Password for the PostgreSQL connection user.
+    displayName: PostgreSQL Connection Password
+    from: '[a-zA-Z0-9]{16}'
+    generate: expression
+    name: POSTGRESQL_PASSWORD
+    value: obppassword
+    required: true
+  - description: Name of the PostgreSQL database accessed.
+    displayName: PostgreSQL Database Name
+    name: POSTGRESQL_DATABASE
+    required: true
+    value: obpuser
+  - description: 'Volume space available for data, e.g. 512Mi, 2Gi.'
+    displayName: Volume Capacity
+    name: VOLUME_CAPACITY
+    required: true
+    value: 1Gi
+  - description: 'Version of PostgreSQL image to be used (9.4, 9.5, 9.6 or latest).'
+    displayName: Version of PostgreSQL Image
+    name: POSTGRESQL_VERSION
+    required: true
+    value: '9.6'

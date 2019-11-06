@@ -1,2 +1,0 @@
-dependencies:
-  - { role: project, when: configure_only == 'false',  project: '{{ backend_project }}', display_name: "International Inc" }

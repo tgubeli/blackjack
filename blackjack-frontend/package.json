@@ -1,0 +1,23 @@
+{
+  "name": "blackjack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "blackjack.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pseguel/blackjack.git"
+  },
+  "keywords": [],
+  "author": "Paulo Seguel",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "bugs": {
+    "url": "https://github.com/pseguel/blackjack/issues"
+  },
+  "homepage": "https://github.com/pseguel/blackjack#readme"
+}

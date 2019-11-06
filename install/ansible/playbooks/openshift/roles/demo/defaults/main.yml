@@ -1,9 +1,0 @@
----
-namespace: openbanking
-blackjack_project: blackjack-app
-ocp_domain: 3901.openshiftworkshop.com
-ocp_apps_domain: apps.3901.openshiftworkshop.com
-threescale: false
-configure_only: false
-create_tenants: true
-create_realms: true
