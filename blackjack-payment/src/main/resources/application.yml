@@ -23,7 +23,7 @@ obp:
   userpassword: Treedom#112
   userDefaultPass: Demojam123!
   consumerkey: l4hnl0ivld1f55knjjwoxtrur2c2qvljlulsc2st
-  endpointurl: obpapi-service.demojam.svc.cluster.local
+  endpointurl: obpapi-service.obp-api.svc.cluster.local
   bankDefaultName: psd201-bank-x--uk
   homeUsername: blackjack.casino2@email.com
   homeACID: f25567cf-e774-47a1-ad4b-ea8383e02f87-1571170552295
@@ -48,7 +48,7 @@ postgres:
     database: obpuser
     username: obpuser
     password: obppassword
-    host: postgresql.demojam.svc.cluster.local
+    host: postgresql.obp-data.svc.cluster.local
     port: 5432
 
 spring:
