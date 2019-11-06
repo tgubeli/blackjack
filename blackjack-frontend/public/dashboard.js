@@ -1,7 +1,7 @@
 $(document).ready(function() {
     var refreshRate = '5000';
     var guid = 'scjocp3-a9fc';
-    var api_ranking = 'http://blackjack-ranking.apps.'+guid+'.open.redhat.com/blackjack/user/ranking';
+    var api_ranking = 'http://blackjack-ranking-blackjack.apps.'+guid+'.open.redhat.com/blackjack/user/ranking';
 
     $.getJSON(api_ranking, function (response) {
 
