@@ -109,7 +109,7 @@ input#wager { margin-left: 5px; position: relative; top: 4px }
 #money, #money:before {
 	border-radius: 5px;
 	bottom: 0;
-	height: 125px;
+	height: 80px;
 	padding: 7px;
 	position: absolute;
 	right: 0;
