@@ -814,7 +814,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 		var email = document.getElementById('account-email').value;
 
 		if (!emailIsValid(email)) {
-			alert('Please enter a valid redhat.com email address!');	
+			alert('Please enter a valid email address!');	
 			location.reload(true);
 		} else {
 			// block Deal button while getting info
