@@ -483,6 +483,10 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 		$(score).html(this.getScore());
 		$('#cash span').html(player.getCash());
 		player.getBank();
+
+		//if loading message is active...now should be hided
+		$('#loadingModal').modal('hide');
+
 	};
 
 /*	Player.prototype.getMoneyFromAccount = function(accName, qty) {
@@ -827,8 +831,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			$('#username span').html(email);
 			$('#deal').prop('disabled', false);
 
-			//Loading message off
-			$('#loadingModal').modal('hide');
+			
 		}
 	});
 
