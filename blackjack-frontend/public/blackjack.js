@@ -122,14 +122,14 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			this.updateBoard();
 		};
 
-		this.getBank = function() {
+		/*this.getBank = function() {
 			$('#bank').html('Winnings: $' + bank.formatMoney(2, '.', ','));
 
 			if(bank < 0) {
 				$('#bank').html('Winnings: <span style="color: #D90000">-$' + 
 				bank.formatMoney(2, '.', ',').toString().replace('-', '') + '</span>');
 			}
-		};
+		};*/
 
 		this.setBank = function(money) {
 			bank += money;
