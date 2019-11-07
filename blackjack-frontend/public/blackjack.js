@@ -809,6 +809,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 
 	//showAlert('TEST - Please enter your e-mail: \n\n');
 	$('#myModalInit').modal({backdrop: 'static'});
+	
 
 	$('#firstGame').on('click', function(e) {
 		var email = document.getElementById('account-email').value;
@@ -818,10 +819,16 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			location.reload(true);
 		} else {
 			// block Deal button while getting info
+			//Loading message
+			$('#loadingModal').modal({backdrop: 'static'});
+
 			$('#deal').prop('disabled', true);
 			player.getAccountInfo(email);
 			$('#username span').html(email);
 			$('#deal').prop('disabled', false);
+
+			//Loading message off
+			$('#loadingModal').modal('hide');
 		}
 	});
 
