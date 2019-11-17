@@ -1,6 +1,6 @@
 $(document).ready(function() {
     var refreshRate = '5000';
-    var guid = 'scjocp3-a9fc';
+    var guid = 'santiago-02c1';
     var api_ranking = 'http://blackjack-ranking-blackjack.apps.'+guid+'.open.redhat.com/blackjack/user/ranking';
 
     $.getJSON(api_ranking, function (response) {
