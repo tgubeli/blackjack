@@ -19,12 +19,16 @@ public class RankingProcessor implements Processor {
 			UserRanking user = new UserRanking();
 			String balance = String.valueOf(item.get("accountbalance"));
 			user.setEmail(String.valueOf(item.get("holder")));
-			user.setBalance(
-				balance.substring(
-					0,(balance.length()-2)
-					)
-				.concat(".00")
-			);
+			if(!balance.equals("0")){
+				user.setBalance(
+					balance.substring(
+						0,(balance.length()-2)
+						)
+					.concat(".00")
+				);
+			}else{
+				user.setBalance(balance.concat(".00"));	
+			}
 			users.add(user);
 		}
 
