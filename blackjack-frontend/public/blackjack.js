@@ -55,7 +55,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			bank  = 0,
 			ele   = '',
 			score = '';
-		
+
 		var guid = 'scl-d9ae';
 		var api_payment = 'http://blackjack-payment-blackjack.apps.'+guid+'.open.redhat.com/blackjack';
 		var api_users = 'http://blackjack-users-blackjack.apps.'+guid+'.open.redhat.com/blackjack';
