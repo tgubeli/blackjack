@@ -57,8 +57,8 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			score = '';
 		
 		var guid = 'chcompra-2f88';
-		var api_payment = 'http://blackjack-payment-blackjack.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
-		var api_users = 'http://blackjack-users-blackjack.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
+		var api_payment = 'http://istio-ingressgateway-user1-istio-system.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
+		var api_users = 'http://istio-ingressgateway-user1-istio-system.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
 
 		this.account_info = {
 			email: 'not_set@redhat.com',
