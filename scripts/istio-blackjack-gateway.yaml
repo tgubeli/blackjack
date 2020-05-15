@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: blackjack-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "<<REPLACE WITH YOUR BOOKINFO APP URL>>"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: blackjack
+spec:
+  hosts:
+  - "<<REPLACE WITH YOUR BOOKINFO APP URL>>"
+  gateways:
+  - blackjack-gateway
+  http:
+  - match:
+    - uri:
+        exact: /blackjack.html
+    - uri:
+        exact: /dashboard.html
+    route:
+    - destination:
+        host: blackjack-frontend
+        port:
+          number: 8080
