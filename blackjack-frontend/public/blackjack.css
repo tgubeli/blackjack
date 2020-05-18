@@ -12,7 +12,7 @@ h3 {
 }
 
 #game {
-	background: transparent url('https://www.clowerweb.com/cors/blackjack/table.png') 0 0 no-repeat;
+	background: transparent url('table.png') 0 0 no-repeat;
 	border-radius: 5px;
 	color: #333;
 	font: 14px/17px Helvetica, Arial, Verdana, sans-serif;
