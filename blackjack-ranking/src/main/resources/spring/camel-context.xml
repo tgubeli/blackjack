@@ -26,7 +26,7 @@
         
         <rest apiDocs="true" bindingMode="auto" enableCORS="true"
             id="rest-api" produces="application/json">
-            <get id="get-ranking" uri="/blackjack/user/ranking">
+            <get id="get-ranking" uri="/blackjack/ranking">
                 <description>Returns top 10 players of the game ordered by the amount won in the game.</description>
                 <to uri="direct:ranking"/>
             </get>
