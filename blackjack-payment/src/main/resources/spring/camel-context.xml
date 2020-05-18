@@ -50,7 +50,7 @@
             <!-- </get> -->
             
             <post id="post-payment"
-                type="com.redhat.samples.blackjack.model.Payment" uri="/blackjack/user/payment">
+                type="com.redhat.samples.blackjack.model.Payment" uri="/blackjack/payment">
                 <to uri="direct:payment"/>
             </post>
             
