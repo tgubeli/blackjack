@@ -166,7 +166,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 		};
 
 		this.accountTransaction = function(amount) {
-			const url = api_payment + '/user/payment';
+			const url = api_payment + '/payment';
 			var remanent = Math.abs(amount);
 			var payment;
 
