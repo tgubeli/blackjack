@@ -1,10 +1,25 @@
 apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: blackjack-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+---
+apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: blackjack
 spec:
   hosts:
-  - "istio-ingressgateway-user1-istio-system.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
   gateways:
   - blackjack-gateway
   http:
@@ -49,7 +64,7 @@ metadata:
   name: blackjack-users
 spec:
   hosts:
-  - "istio-ingressgateway-user1-istio-system.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
   gateways:
   - blackjack-gateway
   http:
@@ -78,7 +93,7 @@ metadata:
   name: blackjack-payment
 spec:
   hosts:
-  - "istio-ingressgateway-user1-istio-system.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
   gateways:
   - blackjack-gateway
   http:
@@ -106,7 +121,7 @@ metadata:
   name: blackjack-ranking
 spec:
   hosts:
-  - "istio-ingressgateway-user1-istio-system.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
   gateways:
   - blackjack-gateway
   http:
@@ -134,7 +149,7 @@ metadata:
   name: blackjack-status
 spec:
   hosts:
-  - "istio-ingressgateway-user1-istio-system.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
   gateways:
   - blackjack-gateway
   http:
