@@ -1,8 +1,7 @@
 $(document).ready(function() {
     var refreshRate = '5000';
     var guid = 'chcompra-2f88';
-    
-    var api_ranking = 'http://istio-ingressgateway-user1-istio-system.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack/ranking';
+    var api_ranking = 'http://blackjack.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack/ranking';
 
     $.getJSON(api_ranking, function (response) {
 

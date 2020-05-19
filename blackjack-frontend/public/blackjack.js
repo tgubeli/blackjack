@@ -57,8 +57,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			score = '';
 		
 		var guid = 'chcompra-2f88';
-		var api_payment = 'http://istio-ingressgateway-user1-istio-system.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
-		var api_users = 'http://istio-ingressgateway-user1-istio-system.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
+		var api_url = 'http://blackjack.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
 
 		this.account_info = {
 			email: 'not_set@redhat.com',
@@ -146,7 +145,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 		};
 
 		this.getAccountInfo = function(email) {
-			const url = api_users +'/user?email=' + email;
+			const url = api_url +'/user?email=' + email;
 			const fetchPromise = fetch(url);
 
 			fetchPromise.then(response => {
@@ -166,7 +165,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 		};
 
 		this.accountTransaction = function(amount) {
-			const url = api_payment + '/payment';
+			const url = api_url + '/payment';
 			var remanent = Math.abs(amount);
 			var payment;
 
