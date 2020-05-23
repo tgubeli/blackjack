@@ -1,7 +1,9 @@
 # Openbanking at Scale - Black Jack
 
 ### Demo Overview
-This demo is based on Red Hat Openshift and Red Hat middleware (Node.js, SpringBoot and Red Hat Fuse). Also use a version of the Open Source project [Open Bank Project](https://www.openbankproject.com/).
+This demo focused in demonstrate in a simple and easy way how to manage a simple MSA solution for Open Banking, adding some fun playing Black Jack.
+We use Red Hat Openshift Platform for deploying the apps wich are based on Red Hat middleware container runtimes like Node.js, SpringBoot and Red Hat Fuse. 
+Also use we use a OpenBanking API Backend called [Open Bank Project](https://www.openbankproject.com/).
 
 <img src="./img/demo-diagram.png"/>
 
@@ -11,7 +13,7 @@ Francisco Meneses - [https://github.com/fmenesesg](https://github.com/fmenesesg)
 Paulo Seguel - [https://github.com/pseguel](https://github.com/pseguel) 
 Chrystian Duarte - [https://github.com/ChrystianDuarte](https://github.com/ChrystianDuarte) 
 
-**Event:** Red Hat Tech Exchange 2019 - Openbank at Scale Team 
+**Event:** Red Hat Tech Exchange Oct 2019 - Openbank at Scale Team 
 **Third party OSS project:** [OpenBankProject](https://www.openbankproject.com/)
 
 # How to deploy this DEMO
