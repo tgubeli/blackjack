@@ -21,7 +21,7 @@ Also use we use a OpenBanking API Backend called [Open Bank Project](https://www
 
 # How to deploy this DEMO
 
-***This demo/app was tested with Openshift version 4.3 and 4.4.***
+*** This demo was tested with Openshift version 4.3 and 4.4 ***
 
 What you will need:
  - An Openshift 4.4 cluster
