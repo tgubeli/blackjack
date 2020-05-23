@@ -204,8 +204,8 @@ Game: http://blackjack.apps.<YOUR_OCP_WILDCARD_DNS>/blackjack.html
 
 Top Ten users: http://blackjack.<YOUR_OCP_WILDCARD_DNS>/dashboard.html
 
-## Optional: Create a business Dashboard with Kiali
-Open Kali web console (Administration View > Monitoring > Logging) and after some calls (bets from BlackJack Frontend UI) you should see something like this:
+## Optional: Create a business Dashboard with Kibana
+Open Kibana web console (Administration View > Monitoring > Logging) and after some calls (bets from BlackJack Frontend UI) you should see something like this:
 <img src="./img/kiali-dashbard.png"/>
 
 ## Optional: Enable Autoscalling
