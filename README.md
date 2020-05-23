@@ -214,8 +214,11 @@ Open Kiali's web console (Go to istio-system project > Networking > Routes > Kia
 
 
 ## Optional: Create a business Dashboard with Kibana
+
 You can create and save this log query: **kubernetes.namespace_name:"blackjack" AND message:"Payment USD$”**
+
 Then you can create some Visualizations like Metric, Goal and Line and save them too.
+
 Then you can create a Business dashboard like this:
 <img src="./img/kibana-dashbard.png"/>
 
