@@ -202,11 +202,23 @@ Go to your browser:
 Game: http://blackjack.apps.<YOUR_OCP_WILDCARD_DNS>/blackjack.html 
 (this URL can be obtain from Projects > istio-system > Networking > Routes)
 
+<img src="./img/front-screen.png"/>
+
+
 Top Ten users: http://blackjack.<YOUR_OCP_WILDCARD_DNS>/dashboard.html
 
+
+#### Seervice Observability with Kiali (comunication between services):
+Open Kiali's web console (Go to istio-system project > Networking > Routes > Kiali) and after some calls (bets from BlackJack Frontend UI) you should see something like this:
+<img src="./img/kiali-graph.png"/>
+
+
 ## Optional: Create a business Dashboard with Kibana
-Open Kibana web console (Administration View > Monitoring > Logging) and after some calls (bets from BlackJack Frontend UI) you should see something like this:
-<img src="./img/kiali-dashbard.png"/>
+You can create and save this log query: **kubernetes.namespace_name:"blackjack" AND message:"Payment USD$”**
+Then you can create some Visualizations like Metric, Goal and Line and save them too.
+Then you can create a Business dashboard like this:
+<img src="./img/kibana-dashbard.png"/>
+
 
 ## Optional: Enable Autoscalling
 In order to add autoscalling capabilities to a POD, for example a blackjack POD (payment or user services), we need to autoscale obp-api POD too and add some parameter to Postgres DB (obp-data).
