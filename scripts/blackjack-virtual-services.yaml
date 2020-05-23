@@ -11,7 +11,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+    - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -19,7 +19,7 @@ metadata:
   name: blackjack
 spec:
   hosts:
-  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
   gateways:
   - blackjack-gateway
   http:
@@ -64,7 +64,7 @@ metadata:
   name: blackjack-users
 spec:
   hosts:
-  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
   gateways:
   - blackjack-gateway
   http:
@@ -93,7 +93,7 @@ metadata:
   name: blackjack-payment
 spec:
   hosts:
-  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
   gateways:
   - blackjack-gateway
   http:
@@ -121,7 +121,7 @@ metadata:
   name: blackjack-ranking
 spec:
   hosts:
-  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
   gateways:
   - blackjack-gateway
   http:
@@ -149,7 +149,7 @@ metadata:
   name: blackjack-status
 spec:
   hosts:
-  - "blackjack.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
   gateways:
   - blackjack-gateway
   http:
