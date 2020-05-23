@@ -1,0 +1,125 @@
+kind: "Template"
+apiVersion: v1
+metadata:
+  name: "obp-api-template"
+objects:
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bootstrap-deployment
+        labels:
+          app: bootstrap
+          app.kubernetes.io/part-of: obp-api
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: bootstrap
+        template:
+          metadata: 
+            labels:
+              app: bootstrap
+            annotations:
+              sidecar.istio.io/inject: 'true'
+          spec:
+            containers:
+            - name: bootstrap-container
+              image: chrisjsimpson/obp-bootstrap:latest
+              imagePullPolicy: Always
+              env:
+              - name: OBP_API_HOST
+                value: http://obpapi-service.test.svc
+              - name: OBP_PASSWORD
+                value: Treedom#112
+              - name: OBP_USERNAME
+                value: demo
+              - name: OBP_EMAIL
+                value: demo@example.com
+              - name: OBP_FIRSTNAME
+                value: fred
+              - name: OBP_LASTNAME
+                value: smith
+              - name: MOZ_HEADLESS
+                value: "1"
+    - kind: Secret
+      apiVersion: v1
+      metadata:
+          name: postgres-credentials
+      type: Opaque
+      data:
+          postgres_user: b2JwdXNlcg== #obpuser
+          postgres_password: b2JwcGFzc3dvcmQ= #obppassword
+          postgres_db_name: b2JwdXNlcg== #obpuser
+          postgres_data: L3Zhci9saWIvcG9zdGdyZXNxbC9kYXRhL3BnZGF0YQ== # /var/lib/postgresql/data/pgdata
+          jdbc_driver: b3JnLnBvc3RncmVzcWwuRHJpdmVy # org.postgresql.Driver
+          jdbc_url: amRiYzpwb3N0Z3Jlc3FsOi8vcG9zdGdyZXNxbC5vYnAtZGF0YS5zdmMuY2x1c3Rlci5sb2NhbDo1NDMyL29icHVzZXI/dXNlcj1vYnB1c2VyJnBhc3N3b3JkPW9icHBhc3N3b3Jk # jdbc:postgresql://postgresql:5432/obpuser?user=obpuser&password=obppassword
+    - kind: Service
+      apiVersion: v1
+      metadata:
+          name: obpapi-service
+      spec:
+          selector:
+              app: obpapi
+          ports:
+          - name: http
+            protocol: TCP
+            port: 80
+            targetPort: 8080
+          type: LoadBalancer
+    - apiVersion: v1
+      kind: Route
+      metadata:
+        name: obp-frontend
+      spec:
+        port:
+          targetPort: http
+        to:
+          kind: Service
+          name: obpapi-service
+    - kind: Deployment
+      apiVersion: apps/v1
+      metadata:
+         name: obp-deployment
+         labels:
+             app: obpapi
+             version: v1
+             app.openshift.io/runtime: java
+             app.kubernetes.io/part-of: obp-api
+      spec:
+          replicas: 1
+          selector:
+              matchLabels:
+                  app: obpapi
+          template:
+              metadata:
+                  labels:
+                      app: obpapi
+                      version: v1
+                  annotations:
+                    sidecar.istio.io/inject: 'true'
+              spec:
+                  containers:
+                  - name: obpapi
+                    image: quay.io/fmeneses/obp-apikube:1.1.0 # docker build -t obpapi-kube .
+                    resources:
+                      limits:
+                        memory: "2048Mi"
+                      requests:
+                        memory: "600Mi"
+                    env:
+                      - name: OBP_DB_DRIVER
+                        valueFrom: 
+                          secretKeyRef: 
+                           name: postgres-credentials
+                           key: jdbc_driver
+                      - name: OBP_DB_URL
+                        valueFrom: 
+                          secretKeyRef: 
+                           name: postgres-credentials
+                           key: jdbc_url
+                      - name: OBP_SUPER_ADMIN_USER_IDS 
+                        value: 2962503a-c671-4708-a4c5-e1a62542ae0b
+
+                    ports:
+                    - containerPort: 8080
+                      name: http

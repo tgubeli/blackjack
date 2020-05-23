@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: blackjack-frontend
+  name: blackjack-frontend
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: blackjack-frontend
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: blackjack-payment
+  name: blackjack-payment
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: tcp
+    port: 9779
+    protocol: TCP
+    targetPort: 9779
+  selector:
+    app: blackjack-payment
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: blackjack-ranking
+  name: blackjack-ranking
+  namespace: blackjack
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: tcp
+    port: 9779
+    protocol: TCP
+    targetPort: 9779
+  selector:
+    app: blackjack-ranking
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: blackjack-status
+  name: blackjack-status
+  namespace: blackjack
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: tcp
+    port: 9779
+    protocol: TCP
+    targetPort: 9779
+  selector:
+    app: blackjack-status
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: blackjack-users
+  name: blackjack-users
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: tcp
+    port: 9779
+    protocol: TCP
+    targetPort: 9779
+  selector:
+    app: blackjack-users
+  type: LoadBalancer
