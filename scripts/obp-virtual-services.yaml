@@ -11,7 +11,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "obp-api.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+    - "obp-api.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -19,7 +19,7 @@ metadata:
   name: obp-api
 spec:
   hosts:
-  - "obp-api.apps.cluster-chcompra-2f88.chcompra-2f88.open.redhat.com"
+  - "obp-api.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
   gateways:
   - obp-gateway
   http:

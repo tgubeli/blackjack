@@ -11,7 +11,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
+    - "blackjack.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -19,7 +19,7 @@ metadata:
   name: blackjack
 spec:
   hosts:
-  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
+  - "blackjack.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
   gateways:
   - blackjack-gateway
   http:
@@ -56,7 +56,6 @@ spec:
       - PUT
       - DELETE
       allowCredentials: true
-      allowHeaders:
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -64,7 +63,7 @@ metadata:
   name: blackjack-users
 spec:
   hosts:
-  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
+  - "blackjack.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
   gateways:
   - blackjack-gateway
   http:
@@ -85,7 +84,6 @@ spec:
       - PUT
       - DELETE
       allowCredentials: true
-      allowHeaders:
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -93,7 +91,7 @@ metadata:
   name: blackjack-payment
 spec:
   hosts:
-  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
+  - "blackjack.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
   gateways:
   - blackjack-gateway
   http:
@@ -121,7 +119,7 @@ metadata:
   name: blackjack-ranking
 spec:
   hosts:
-  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
+  - "blackjack.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
   gateways:
   - blackjack-gateway
   http:
@@ -149,7 +147,7 @@ metadata:
   name: blackjack-status
 spec:
   hosts:
-  - "blackjack.<YOUR_WILDCARD_OCP_DNS>"
+  - "blackjack.apps.cluster-demo-2763.demo-2763.example.opentlc.com"
   gateways:
   - blackjack-gateway
   http:

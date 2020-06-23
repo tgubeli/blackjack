@@ -56,8 +56,9 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			ele   = '',
 			score = '';
 		
-		var guid = 'chcompra-2f88';
-		var api_url = 'http://blackjack.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
+		var guid = 'demo-2763';
+		var api_url_user = 'http://blackjack-user.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
+		var api_url_payment = 'http://blackjack-payment.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
 
 		this.account_info = {
 			email: 'not_set@redhat.com',
@@ -145,7 +146,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 		};
 
 		this.getAccountInfo = function(email) {
-			const url = api_url +'/user?email=' + email;
+			const url = api_url_user +'/user?email=' + email;
 			const fetchPromise = fetch(url);
 
 			fetchPromise.then(response => {
@@ -165,7 +166,7 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 		};
 
 		this.accountTransaction = function(amount) {
-			const url = api_url + '/payment';
+			const url = api_url_payment + '/payment';
 			var remanent = Math.abs(amount);
 			var payment;
 
