@@ -57,8 +57,8 @@ resetBoard, showBoard, showAlert, getWinner, jQuery, wager */
 			score = '';
 			
 		var guid = 'demo-2763';
-		var api_url_user = 'http://blackjack-users-webinar.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
-		var api_url_payment = 'http://blackjack-payment-webinar.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack';
+		var api_url_user = 'http://blackjack-users-webinar.apps.cluster-'+guid+'.'+guid+'.example.opentlc.com/blackjack';
+		var api_url_payment = 'http://blackjack-payment-webinar.apps.cluster-'+guid+'.'+guid+'.example.opentlc.com/blackjack';
 
 		this.account_info = {
 			email: 'not_set@redhat.com',

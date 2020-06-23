@@ -1,7 +1,7 @@
 $(document).ready(function() {
     var refreshRate = '5000';
     var guid = 'demo-2763';
-    var api_ranking = 'http://blackjack-ranking-webinar.apps.cluster-'+guid+'.'+guid+'.open.redhat.com/blackjack/ranking';
+    var api_ranking = 'http://blackjack-ranking-webinar.apps.cluster-'+guid+'.'+guid+'.example.opentlc.com/blackjack/ranking';
 
     $.getJSON(api_ranking, function (response) {
 
