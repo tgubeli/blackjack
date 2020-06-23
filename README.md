@@ -62,8 +62,14 @@ Just install Service Mesh, don't configure Member Roles and Members. We are goin
 	
 3. Create Istio Gateways and Virtual Services in the projects
 
-First you need to edit some values in obp-virtual-services.yaml and blackjack-virtual-services.yaml. Just need to replace the string "<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN>” with your domain wildcard: Example: if your OCP DNS Wildcard is “*.apps.cluster-demo.demo.example.opentlc.com”, just replace "<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN>” with “.apps.cluster-demo.demo.example.opentlc.com”.
+First you need to edit some values in obp-virtual-services.yaml and blackjack-virtual-services.yaml. 
+
+Just need to replace the string "<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN>” with your domain wildcard: 
+
+Example: if your OCP DNS Wildcard is “*.apps.cluster-demo.demo.example.opentlc.com”, just replace "<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN>” with “.apps.cluster-demo.demo.example.opentlc.com”.
+
 Then you can create the Gateways and VirtualServices:
+
 	```
 	oc apply -n obp-api -f obp-virtual-services.yaml
 	oc apply -n blackjack -f blackjack-virtual-services.yaml
