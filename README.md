@@ -78,7 +78,7 @@ We are going to route every external call through the Istio’s Service called "
 
 ### Clone git repo
 ```
-git clone [https://github.com/tgubeli/blackjack.git](https://github.com/tgubeli/blackjack.git#master)
+git clone https://github.com/tgubeli/blackjack.git
 cd blackjack/scripts/obp
 ```
 
@@ -92,7 +92,7 @@ oc new-app --template=postgresql-persistent --param=NAMESPACE=openshift --param=
 ```
 oc project obp-api
 oc create -f obp-template-demojam
-oc process obp-api-example | oc create -f -
+oc process obp-api-template | oc create -f -
 ```
 
 #### Restore data from Dump file
