@@ -177,7 +177,7 @@ oc apply -f blackjack-services.yaml
 #### Add istio side car label to Deployment Configs
 ```
 oc patch -n blackjack dc/blackjack-frontend -p '[{"op": "replace", "path": "/spec/template/metadata/annotations", "value":{"sidecar.istio.io/inject":"true"}}]' --type=json
-oc patch -n blackjack dc/blackjack-payments -p '[{"op": "replace", "path": "/spec/template/metadata/annotations", "value":{"sidecar.istio.io/inject":"true"}}]' --type=json
+oc patch -n blackjack dc/blackjack-payment -p '[{"op": "replace", "path": "/spec/template/metadata/annotations", "value":{"sidecar.istio.io/inject":"true"}}]' --type=json
 oc patch -n blackjack dc/blackjack-status -p '[{"op": "replace", "path": "/spec/template/metadata/annotations", "value":{"sidecar.istio.io/inject":"true"}}]' --type=json
 oc patch -n blackjack dc/blackjack-users -p '[{"op": "replace", "path": "/spec/template/metadata/annotations", "value":{"sidecar.istio.io/inject":"true"}}]' --type=json
 oc patch -n blackjack dc/blackjack-ranking -p '[{"op": "replace", "path": "/spec/template/metadata/annotations", "value":{"sidecar.istio.io/inject":"true"}}]' --type=json
