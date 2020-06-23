@@ -126,15 +126,15 @@ oc process obp-api-template | oc create -f -
 ### Deploy Blackjack APIs
 ```
 oc project blackjack
-oc apply -f [https://raw.githubusercontent.com/jboss-fuse/application-templates/2.1.x.redhat-7-4-x/fis-image-streams.json](https://raw.githubusercontent.com/jboss-fuse/application-templates/2.1.x.redhat-7-4-x/fis-image-streams.json) -n openshift
-oc new-app fuse7-java-openshift:1.4~[https://github.com/tgubeli/blackjack.git#master](https://github.com/tgubeli/blackjack.git#master) --context-dir=blackjack-status --name=blackjack-status
-oc new-app fuse7-java-openshift:1.4~[https://github.com/tgubeli/blackjack.git#master](https://github.com/tgubeli/blackjack.git#master) --context-dir=blackjack-users --name=blackjack-users
-oc new-app fuse7-java-openshift:1.4~[https://github.com/tgubeli/blackjack.git#master](https://github.com/tgubeli/blackjack.git#master) --context-dir=blackjack-payment --name=blackjack-payment
-oc new-app fuse7-java-openshift:1.4~[https://github.com/tgubeli/blackjack.git#master](https://github.com/tgubeli/blackjack.git#master) --context-dir=blackjack-ranking --name=blackjack-ranking
+oc apply -f https://raw.githubusercontent.com/jboss-fuse/application-templates/2.1.x.redhat-7-4-x/fis-image-streams.json -n openshift
+oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-status --name=blackjack-status
+oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-users --name=blackjack-users
+oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-payment --name=blackjack-payment
+oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-ranking --name=blackjack-ranking
 ```
 
 ### Deploy Blackjack Frontend
-Fork [https://github.com/tgubeli/blackjack.git](https://github.com/tgubeli/blackjack.git) (you will need an GitHub account)
+Fork https://github.com/tgubeli/blackjack.git (you will need an GitHub account)
 Edit blackjack.js and dashboard.js (.../edit/master/public/blackjack.js and .../edit/master/public/dashboard.js)
 Find and change "GUID" variable value to your host.
 Example: var guid = 'demojam-8b2e';
