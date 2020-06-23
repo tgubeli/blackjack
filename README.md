@@ -61,6 +61,7 @@ Just install Service Mesh, don't configure Member Roles and Members. We are goin
 	```
 	
 3. Create Istio Gateways and Virtual Services in the projects
+
 First you need to edit some values in obp-virtual-services.yaml and blackjack-virtual-services.yaml. Just need to replace the string "<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN>” with your domain wildcard: Example: if your OCP DNS Wildcard is “*.apps.cluster-demo.demo.example.opentlc.com”, just replace "<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN>” with “.apps.cluster-demo.demo.example.opentlc.com”.
 Then you can create the Gateways and VirtualServices:
 	```
@@ -71,7 +72,7 @@ Then you can create the Gateways and VirtualServices:
 4. Create BlackJack and OBP public URL (Routes):
 We are going to route every external call through the Istio’s Service called "istio-ingressgateway”:
 	```
-	oc expose -n istio-system svc/istio-ingressgateway —hostname=blackjack.<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN>
+	oc expose -n istio-system svc/istio-ingressgateway —hostname=blackjack.<YOUR_WILDCARD_OCP_CLUSTER_DOMAIN> --name=blackjack-ingressgateway
 	```
 
 ## Deploying the Apps
