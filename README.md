@@ -141,12 +141,23 @@ oc new-app fuse7-java-openshift:1.4~https://github.com/tgubeli/blackjack.git#mas
 ```
 
 ### Deploy Blackjack Frontend
-Fork https://github.com/tgubeli/blackjack.git (you will need an GitHub account)
 Edit blackjack.js and dashboard.js (.../edit/master/public/blackjack.js and .../edit/master/public/dashboard.js)
 Find and change "GUID" variable value to your host.
 Example: var guid = 'demojam-8b2e';
 
 > Hint: if you don't know what to put en GUID variable, just edit the variable "api_url" and "api_ranking". 
+
+#### Deploy from local source code
+
+We are going to create a new build configuration (named "blackjack-frontend"), start the build and then deploy the app just from your local source code:
+```
+oc new-build --name blackjack-frontend --binary --strategy source --image-stream nodejs:10 
+oc start-build blackjack-frontend --from-dir=./blackjack-frontend
+oc new-app blackjack-frontend
+```
+
+#### Deploy from GIT repo
+Other option is Fork https://github.com/tgubeli/blackjack.git (you will need an GitHub account), make the changes to the files and push them to your own Git repo:
 
 **Commit and push**
 ```
@@ -156,6 +167,7 @@ oc new-app nodejs:10~https://github.com/<your_git_hub_user>/blackjack.git  --con
 ```
 oc new-app nodejs:10~https://github.com/tgubeli/blackjack.git#master --context-dir=blackjack-frontend --name=blackjack-frontend
 ```
+
 
 #### Change default Services port and port-name
 ```
